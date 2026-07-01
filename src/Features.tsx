@@ -102,19 +102,19 @@ export function RatingSection() {
       </div>
 
       {submitted && saved ? (
-        <div className="text-center py-4">
-          <div className="text-4xl mb-3">🎉</div>
-          <div className="text-lg font-bold text-white mb-1">
+        <div className="py-4 text-center">
+          <div className="mb-3 text-4xl">🎉</div>
+          <div className="mb-1 text-lg font-bold text-white">
             {isAr ? "شكراً لتقييمك!" : "Thanks for your rating!"}
           </div>
-          <div className="flex justify-center gap-1 mb-3">
+          <div className="mb-3 flex justify-center gap-1">
             {stars.map((s) => (
               <span key={s} className={`text-2xl ${s <= saved.rating ? "opacity-100" : "opacity-20"}`}>⭐</span>
             ))}
           </div>
           {saved.comment && (
-            <div className="rounded-xl border border-white/5 bg-black/30 p-3 text-sm text-white/70 max-w-sm mx-auto">
-              "{saved.comment}"
+            <div className="mx-auto max-w-sm rounded-xl border border-white/5 bg-black/30 p-3 text-sm text-white/70">
+              &ldquo;{saved.comment}&rdquo;
             </div>
           )}
           <button onClick={() => { setSubmitted(false); setSaved(null); }} className="mt-4 text-xs text-orange-300 hover:text-orange-200">
@@ -123,20 +123,20 @@ export function RatingSection() {
         </div>
       ) : (
         <>
-          <div className="flex justify-center gap-2 mb-4">
+          <div className="mb-4 flex justify-center gap-2">
             {stars.map((s) => (
               <button
                 key={s}
                 onMouseEnter={() => setHoverRating(s)}
                 onMouseLeave={() => setHoverRating(0)}
                 onClick={() => setRating(s)}
-                className={`text-3xl transition-transform hover:scale-125 ${s <= activeRating ? "opacity-100 scale-110" : "opacity-30"}`}
+                className={`text-3xl transition-transform hover:scale-125 ${s <= activeRating ? "scale-110 opacity-100" : "opacity-30"}`}
               >
                 ⭐
               </button>
             ))}
           </div>
-          <div className="text-center text-xs text-white/50 mb-4">
+          <div className="mb-4 text-center text-xs text-white/50">
             {activeRating === 1 && (isAr ? "ضعيف" : "Poor")}
             {activeRating === 2 && (isAr ? "مقبول" : "Fair")}
             {activeRating === 3 && (isAr ? "جيد" : "Good")}
@@ -147,7 +147,7 @@ export function RatingSection() {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder={isAr ? "اكتب تعليقك هنا... (اختياري)" : "Write your comment... (optional)"}
-            className="w-full rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-white/30 resize-none h-20 focus:border-orange-400/50 focus:outline-none"
+            className="h-20 w-full resize-none rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-white/30 focus:border-orange-400/50 focus:outline-none"
           />
           <button onClick={handleSubmit} disabled={rating === 0} className="btn-primary mt-3 w-full rounded-xl px-5 py-3 text-sm disabled:opacity-40">
             {isAr ? "إرسال التقييم" : "Submit Rating"}
@@ -207,52 +207,133 @@ export function AIPredictions({ deviceName, fingers, styleId, weaponName }: {
   const { lang } = useLang();
   const isAr = lang === "ar";
 
-  // Simulated AI predictions based on inputs
+  const sniper = /sniper|AWM|Kar98|M24|Lynx/i.test(weaponName);
   const predictions = [
     {
       icon: "🎯",
       title: isAr ? "دقة الرأس" : "Headshot Accuracy",
-      value: `${Math.min(95, 65 + fingers * 5 + (styleId === "headshot" ? 15 : 5))}%`,
-      color: "text-emerald-300",
+      value: Math.min(95, 58 + fingers * 3 + (styleId === "headshot" ? 16 : styleId === "competitive" ? 8 : 0) + (sniper ? 6 : 0)),
+      color: "from-orange-500 to-red-500",
+    },
+    {
+      icon: "🌀",
+      title: isAr ? "استقرار التتبع" : "Tracking Stability",
+      value: Math.min(96, 55 + fingers * 4 + (styleId === "spray" ? 18 : styleId === "aggressive" ? 10 : 4)),
+      color: "from-emerald-500 to-teal-500",
     },
     {
       icon: "⚡",
-      title: isAr ? "سرعة الاستجابة" : "Reaction Speed",
-      value: `${Math.min(99, 70 + (deviceName.includes("iPhone 16") || deviceName.includes("S25") ? 20 : 10))}%`,
-      color: "text-orange-300",
+      title: isAr ? "سرعة الفليك" : "Flick Speed",
+      value: Math.min(94, 60 + (styleId === "headshot" ? 20 : styleId === "aggressive" ? 14 : 6) + fingers),
+      color: "from-sky-500 to-indigo-500",
     },
     {
-      icon: "🔥",
-      title: isAr ? "قوة الرش" : "Spray Power",
-      value: `${Math.min(98, 60 + (weaponName === "M416" ? 25 : 15))}%`,
-      color: "text-red-300",
-    },
-    {
-      icon: "🏆",
-      title: isAr ? "فرص الفوز" : "Win Probability",
-      value: `${Math.min(96, 55 + fingers * 7)}%`,
-      color: "text-amber-300",
+      icon: "💪",
+      title: isAr ? "تحكم الارتداد" : "Recoil Control",
+      value: Math.min(97, 50 + fingers * 5 + (styleId === "spray" ? 22 : styleId === "competitive" ? 12 : 4)),
+      color: "from-purple-500 to-fuchsia-500",
     },
   ];
 
   return (
-    <div className="card rounded-2xl p-5">
-      <div className="mb-4 flex items-center gap-2">
+    <div className="card rounded-2xl p-4">
+      <div className="mb-3 flex items-center gap-2">
         <span className="text-xl">🤖</span>
         <h3 className="font-display text-sm font-bold tracking-widest text-white">
-          {isAr ? "تنبؤات الذكاء الاصطناعي" : "AI Predictions"}
+          {isAr ? "توقعات الذكاء الاصطناعي" : "AI Predictions"}
         </h3>
+        <span className="ml-auto text-[9px] uppercase tracking-widest text-white/30">{deviceName.split(" ")[0]}</span>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         {predictions.map((p) => (
           <div key={p.title} className="rounded-xl border border-white/5 bg-black/30 p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">{p.icon}</span>
-              <span className={`font-display text-lg font-bold tabular-nums ${p.color}`}>{p.value}</span>
+            <div className="mb-1.5 flex items-center gap-1.5">
+              <span>{p.icon}</span>
+              <span className="text-[11px] font-semibold text-white/70">{p.title}</span>
             </div>
-            <div className="mt-2 text-[10px] uppercase tracking-widest text-white/50">{p.title}</div>
+            <div className="mb-1.5 font-display text-lg font-black text-white tabular-nums">{p.value}%</div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+              <div className={`h-full rounded-full bg-gradient-to-r ${p.color} stat-bar`} style={{ width: `${p.value}%` }} />
+            </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ============ AI COACH — FULL ANALYSIS ============
+export function AiCoach({ sens, deviceName, weaponName, fingers, styleId }: {
+  sens: Sens; deviceName: string; weaponName: string; fingers: number; styleId: string;
+}) {
+  const { lang } = useLang();
+  const isAr = lang === "ar";
+
+  const score = sens.aiScore;
+  const verdict =
+    score >= 90 ? { label: isAr ? "أداء نخبة 🏆" : "Elite Tier 🏆", color: "text-orange-300" } :
+    score >= 75 ? { label: isAr ? "أداء احترافي ⚡" : "Pro Tier ⚡", color: "text-emerald-300" } :
+    score >= 60 ? { label: isAr ? "أداء جيد ✅" : "Solid Tier ✅", color: "text-sky-300" } :
+    { label: isAr ? "يحتاج تحسين 💪" : "Needs Work 💪", color: "text-amber-300" };
+
+  const strengths: string[] = [];
+  const tips: string[] = [];
+  const f = sens.factors;
+
+  if (f.deviceFactor >= 0.98) strengths.push(isAr ? "جهاز عالي الأداء" : "High-performance device");
+  if (f.weaponFactor >= 0.7) strengths.push(isAr ? "سلاح منضبط الارتداد" : "Controllable recoil weapon");
+  if (fingers >= 4) strengths.push(isAr ? "تحكم متعدد الأصابع" : "Multi-finger control");
+  if (f.styleFactor <= 1.0) strengths.push(isAr ? "حساسية دقيقة ومستقرة" : "Precise, stable sens");
+
+  if (f.deviceFactor < 0.93) tips.push(isAr ? "فعّل أعلى إطار (FPS) المتاح بجهازك" : "Enable the highest available FPS");
+  if (f.weaponFactor < 0.6) tips.push(isAr ? "تمرّن على أنماط الارتداد لهذا السلاح" : "Practice this weapon's recoil patterns");
+  if (fingers < 4) tips.push(isAr ? "انتقل إلى 4 أصابع لمزيد من التحكم" : "Move to 4 fingers for more control");
+  if (f.styleFactor > 1.05) tips.push(isAr ? "قلّل الحساسية قليلاً لتحسين الدقة" : "Lower sens slightly for better precision");
+  if (tips.length === 0) tips.push(isAr ? "أداؤك متوازن — ركّز على التمرين فقط" : "Your setup is balanced — focus on practice");
+
+  return (
+    <div className="card neon-box rounded-2xl p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <span className="text-xl">🧠</span>
+        <h3 className="font-display text-sm font-bold tracking-widest text-white">
+          {isAr ? "المدرب الذكي — تحليل كامل" : "AI Coach — Full Analysis"}
+        </h3>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/8 bg-black/30 p-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest text-white/40">
+            {deviceName} · {weaponName} · {fingers}F · {styleId}
+          </div>
+          <div className={`font-display text-lg font-black ${verdict.color}`}>{verdict.label}</div>
+        </div>
+        <div className="text-right">
+          <div className="font-display text-3xl font-black text-orange-300 tabular-nums">{score}</div>
+          <div className="text-[9px] uppercase tracking-widest text-white/40">AI / 100</div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-3">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300/80">
+            ✅ {isAr ? "نقاط القوة" : "Strengths"}
+          </div>
+          <ul className="space-y-1">
+            {strengths.map((s, i) => (
+              <li key={i} className="text-xs text-white/70">• {s}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-xl border border-amber-400/20 bg-amber-500/5 p-3">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-300/80">
+            💡 {isAr ? "نصائح للتحسين" : "Improvement Tips"}
+          </div>
+          <ul className="space-y-1">
+            {tips.map((s, i) => (
+              <li key={i} className="text-xs text-white/70">• {s}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

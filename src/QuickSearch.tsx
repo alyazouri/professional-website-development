@@ -15,9 +15,9 @@ export function QuickSearch({ onSelect }: { onSelect: (r: Result) => void }) {
     if (!query) return [];
     const out: Result[] = [];
     for (const b of BRANDS) {
-      for (const d of b.devices) {
-        if (d.name.toLowerCase().includes(query) || b.name.toLowerCase().includes(query)) {
-          out.push({ type: "device", id: `${b.id}|${d.name}`, name: d.name, sub: `${d.fps} FPS · ${d.touchRate}Hz · ${d.screenSize}"`, icon: b.icon });
+      for (const dev of b.devices) {
+        if (dev.name.toLowerCase().includes(query) || b.name.toLowerCase().includes(query)) {
+          out.push({ type: "device", id: `${b.id}|${dev.name}`, name: dev.name, sub: `${dev.fps} FPS · ${dev.touchRate}Hz · ${dev.screenSize}"`, icon: b.icon });
         }
       }
     }

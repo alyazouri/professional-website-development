@@ -17,13 +17,7 @@ export const translations = {
   hero_badge: { ar: "ALYAZOURI AI ENGINE 2026", en: "ALYAZOURI AI ENGINE 2026", tr: "ALYAZOURI AI ENGINE 2026", ru: "ALYAZOURI AI ENGINE 2026", es: "ALYAZOURI AI ENGINE 2026" },
   hero_title1: { ar: "محسّن الأردن الاحترافي", en: "Jordan Optimizer Pro", tr: "Jordan Optimize Editörü", ru: "Профессиональный Оптимизатор Иордании", es: "Optimizador Jordánico" },
   hero_title2: { ar: "PUBG Mobile", en: "PUBG Mobile", tr: "PUBG Mobile", ru: "PUBG Mobile", es: "PUBG Mobile" },
-  hero_desc: {
-    ar: "حساسية احترافية مدعومة بالذكاء الاصطناعي — أقل بينغ ممكن، فريق أردني، تجنيد سريع، تغطية كاملة لـ",
-    en: "Real AI-powered sensitivity — lowest ping possible, Jordanian team, fast recruitment, full coverage of",
-    tr: "Gerçek AI destekli hassasiyet — en düşük ping, Rüya ekibi, hızlı alım, tam kapsamlı",
-    ru: "Реальная чувствительность на базе ИИ — минимальный пинг, иорданская команда, быстрый набор, полное покрытие",
-    es: "Sensibilidad real con IA — ping más bajo, equipo jordánico, reclutamiento rápido, cobertura total"
-  },
+  hero_desc: { ar: "حساسية احترافية مدعومة بالذكاء الاصطناعي — أقل بينغ ممكن، فريق أردني، تجنيد سريع، تغطية كاملة لـ", en: "Real AI-powered sensitivity — lowest ping possible, Jordanian team, fast recruitment, full coverage of", tr: "Gerçek AI destekli hassasiyet — en düşük ping, Rüya ekibi, hızlı alım, tam kapsamlı", ru: "Реальная чувствительность на базе ИИ — минимальный пинг, иорданская команда, быстрый набор, полное покрытие", es: "Sensibilidad real con IA — ping más bajo, equipo jordánico, reclutamiento rápido, cobertura total" },
   hero_devices: { ar: "77 جهاز", en: "77 devices", tr: "77 cihaz", ru: "77 устройств", es: "77 dispositivos" },
   hero_weapons: { ar: "44 سلاح", en: "44 weapons", tr: "44 silah", ru: "44 оружия", es: "44 armas" },
   hero_stats_devices: { ar: "الأجهزة", en: "Devices", tr: "Cihazlar", ru: "Устройства", es: "Dispositivos" },
@@ -109,6 +103,7 @@ export const translations = {
   ai_score_label: { ar: "AI SCORE", en: "AI SCORE", tr: "AI SKOR", ru: "AI ОЦЕНКА", es: "AI PUNTUACIÓN" },
   ai_score_title: { ar: "نتيجة التوافق", en: "Compatibility Score", tr: "Uyumluluk Skoru", ru: "Совместимость", es: "Compatibilidad" },
   ai_suffix: { ar: "F", en: "F", tr: "F", ru: "F", es: "F" },
+  ai_autotune: { ar: "⚡ ضبط ذكي تلقائي", en: "⚡ AI Auto-Tune", tr: "⚡ AI Otomatik", ru: "⚡ AI Авто-настройка", es: "⚡ Auto-Ajuste IA" },
 
   // STABILITY
   stability_title: { ar: "تحليل الاستقرار", en: "Stability Analysis", tr: "Stabilite Analizi", ru: "Анализ стабильности", es: "Análisis estabilidad" },
@@ -120,12 +115,12 @@ export const translations = {
   stability_desc: { ar: "حساب متعدد العوامل لأفضل استقرار", en: "Multi-factor calculation for optimal stability", tr: "Optimal stabilite için çok faktörlü hesaplama", ru: "Многофакторный расчёт для стабильности", es: "Cálculo multifactorial para estabilidad" },
 
   // PING
-  ping_eyebrow: { ar: "LIVE PING MONITOR", en: "LIVE PING MONITOR", tr: "CANLI PING MONİTÖRÜ", ru: "МОНИТОР ПИНГА", es: "MONITOR DE PING" },
-  ping_title: { ar: "📡 مراقب البينغ المباشر", en: "📡 Live Ping Monitor", tr: "📡 Canlı Ping Monitörü", ru: "📡 Монитор пинга", es: "📡 Monitor de ping" },
-  ping_sub: { ar: "اختبار مباشر لـ 7 سيرفرات عالمية", en: "Live test across 7 global servers", tr: "7 küresel sunucu ile canlı test", ru: "Тест 7 серверов в реальном времени", es: "Prueba en vivo en 7 servidores" },
+  ping_eyebrow: { ar: "PUBG MOBILE SERVER PING", en: "PUBG MOBILE SERVER PING", tr: "PUBG MOBILE SUNUCU PING", ru: "ПИНГ СЕРВЕРОВ PUBG MOBILE", es: "PING SERVIDORES PUBG MOBILE" },
+  ping_title: { ar: "📡 بنق خوادم PUBG Mobile", en: "📡 PUBG Mobile Server Ping", tr: "📡 PUBG Mobile Sunucu Pingo", ru: "📡 Пинг серверов PUBG Mobile", es: "📡 Ping de servidores PUBG Mobile" },
+  ping_sub: { ar: "اختبار مباشر لـ 7 مناطق خوادم في اللعبة", en: "Live test across 7 in-game server regions", tr: "7 oyun sunucu bölgesi ile canlı test", ru: "Тест 7 регионов серверов игры", es: "Prueba en vivo en 7 regiones del juego" },
   ping_live: { ar: "مباشر", en: "LIVE", tr: "CANLI", ru: "LIVE", es: "EN VIVO" },
   ping_live_title: { ar: "مراقبة الشبكة الحية", en: "Live Network Monitor", tr: "Canlı Ağ Monitörü", ru: "Мониторинг сети", es: "Monitor de red" },
-  ping_live_desc: { ar: "قياس latency, jitter, packet loss لكل سيرفر", en: "Measuring latency, jitter, packet loss per server", tr: "Her sunucu için latency, jitter, packet loss", ru: "Измерение задержки, джиттера, потерь", es: "Midiendo latencia, jitter, pérdida" },
+  ping_live_desc: { ar: "قياس حيّ للوصول إلى مناطق الخوادم: latency, jitter, loss", en: "Live reachability to server regions: latency, jitter, loss", tr: "Sunucu bölgelerine canlı erişim: latency, jitter, loss", ru: "Живой доступ к регионам: задержка, джиттер, потери", es: "Acceso en vivo a regiones: latencia, jitter, pérdida" },
   ping_btn_measuring: { ar: "⏳ جاري القياس...", en: "⏳ Measuring...", tr: "⏳ Ölçülüyor...", ru: "⏳ Измерение...", es: "⏳ Midiendo..." },
   ping_btn_remeasure: { ar: "🔄 إعادة القياس", en: "🔄 Re-measure", tr: "🔄 Yeniden Ölç", ru: "🔄 Перемерить", es: "🔄 Medir de nuevo" },
   ping_ping: { ar: "بينغ", en: "Ping", tr: "Ping", ru: "Пинг", es: "Ping" },
@@ -136,6 +131,28 @@ export const translations = {
   ping_quality_good: { ar: "جيد", en: "Good", tr: "İyi", ru: "Хорошо", es: "Bueno" },
   ping_quality_medium: { ar: "متوسط", en: "Medium", tr: "Orta", ru: "Средне", es: "Medio" },
   ping_quality_poor: { ar: "ضعيف", en: "Poor", tr: "Kötü", ru: "Плохо", es: "Malo" },
+
+  // DNS JORDAN
+  dns_eyebrow: { ar: "JORDAN DNS STATUS", en: "JORDAN DNS STATUS", tr: "ÜRDÜN DNS DURUMU", ru: "СТАТУС DNS ИОРДАНИИ", es: "ESTADO DNS JORDANIA" },
+  dns_title: { ar: "🛡️ حالة DNS الأردني المباشرة", en: "🛡️ Live Jordan DNS Status", tr: "🛡️ Canlı Ürdün DNS Durumu", ru: "🛡️ Живой статус DNS Иордании", es: "🛡️ Estado DNS Jordania en vivo" },
+  dns_sub: { ar: "مراقبة 12 خادم DNS أردنيًا لحل أسرع وأكثر استقرارًا", en: "Monitoring 12 Jordanian DNS servers for faster & stable resolution", tr: "Daha hızlı ve stabil çözüm için 12 Ürdün DNS sunucusu izleniyor", ru: "Мониторинг 12 иорданских DNS-серверов для быстрого и стабильного разрешения", es: "Monitoreo de 12 servidores DNS jordanos para resolución rápida y estable" },
+  dns_live: { ar: "مباشر", en: "LIVE", tr: "CANLI", ru: "LIVE", es: "EN VIVO" },
+  dns_ip: { ar: "العنوان", en: "Address", tr: "Adres", ru: "Адрес", es: "Dirección" },
+  dns_latency: { ar: "زمن الاستجابة", en: "Latency", tr: "Gecikme", ru: "Задержка", es: "Latencia" },
+  dns_status: { ar: "الحالة", en: "Status", tr: "Durum", ru: "Статус", es: "Estado" },
+  dns_online: { ar: "متصل", en: "Online", tr: "Çevrimiçi", ru: "В сети", es: "En línea" },
+  dns_offline: { ar: "غير متصل", en: "Offline", tr: "Çevrimdışı", ru: "Не в сети", es: "Sin conexión" },
+  dns_optimal: { ar: "أفضل DNS", en: "Optimal", tr: "En İyi", ru: "Оптимальный", es: "Óptimo" },
+  dns_best: { ar: "الأفضل", en: "BEST", tr: "EN İYİ", ru: "ЛУЧШИЙ", es: "MEJOR" },
+  dns_jitter: { ar: "Jitter", en: "Jitter", tr: "Jitter", ru: "Джиттер", es: "Jitter" },
+  dns_quality_excellent: { ar: "ممتاز", en: "Excellent", tr: "Mükemmel", ru: "Отлично", es: "Excelente" },
+  dns_quality_good: { ar: "جيد", en: "Good", tr: "İyi", ru: "Хорошо", es: "Bueno" },
+  dns_quality_medium: { ar: "متوسط", en: "Medium", tr: "Orta", ru: "Средне", es: "Medio" },
+  dns_quality_poor: { ar: "ضعيف", en: "Poor", tr: "Kötü", ru: "Плохо", es: "Malo" },
+  dns_btn_measuring: { ar: "⏳ جارٍ الفحص...", en: "⏳ Probing...", tr: "⏳ Taranıyor...", ru: "⏳ Проверка...", es: "⏳ Comprobando..." },
+  dns_btn_recheck: { ar: "🔄 إعادة الفحص", en: "🔄 Re-probe", tr: "🔄 Yeniden Tara", ru: "🔄 Перепроверить", es: "🔄 Re-comprobar" },
+  dns_copy: { ar: "📋 نسخ", en: "📋 Copy", tr: "📋 Kopyala", ru: "📋 Копировать", es: "📋 Copiar" },
+  dns_copied: { ar: "✅ تم النسخ!", en: "✅ Copied!", tr: "✅ Kopyalandı!", ru: "✅ Скопировано!", es: "✅ ¡Copiado!" },
 
   // WEAPONS SECTION
   weapons_eyebrow: { ar: "WEAPONS DATABASE", en: "WEAPONS DATABASE", tr: "SİLAH VERİTABANI", ru: "БАЗА ОРУЖИЯ", es: "BASE DE ARMAS" },

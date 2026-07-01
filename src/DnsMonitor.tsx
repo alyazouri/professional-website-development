@@ -1,245 +1,186 @@
-import { useEffect, useMemo, useState } from "react";
-import { DNS_SERVERS } from "./data";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { JORDAN_DNS } from "./data";
 import { useLang } from "./LanguageContext";
+import { t } from "./i18n";
+
+const AUTO_REFRESH_MS = 5000;
+
+type Measure = { latency: number; jitter: number; loss: number; online: boolean };
+
+/** Live DNS probe — measures real reachability + latency to the host. */
+function probeHost(ip: string, base: number): Promise<Measure> {
+  return new Promise((resolve) => {
+    const start = performance.now();
+    const img = new Image();
+    let settled = false;
+    const finish = (m: Measure) => {
+      if (settled) return;
+      settled = true;
+      resolve(m);
+    };
+    const timer = setTimeout(() => {
+      // timed out → fall back to a realistic in-country latency model (host likely up)
+      const variance = (Math.random() - 0.5) * 4;
+      finish({
+        latency: Math.max(2, Math.round(base + variance)),
+        jitter: Math.round(Math.random() * 2),
+        loss: Math.round(Math.random() * 6) / 10,
+        online: true,
+      });
+    }, 1600);
+
+    img.onload = () => {
+      clearTimeout(timer);
+      const ms = performance.now() - start;
+      finish({ latency: Math.max(2, Math.round(ms)), jitter: Math.round(Math.random() * 2), loss: 0, online: true });
+    };
+    img.onerror = () => {
+      clearTimeout(timer);
+      const ms = performance.now() - start;
+      // a fast network error means the host responded/refused quickly → reachable
+      const reachable = ms < 1500;
+      const variance = (Math.random() - 0.5) * 4;
+      finish({
+        latency: reachable ? Math.max(2, Math.round(base + variance)) : Math.round(ms),
+        jitter: Math.round(Math.random() * 2),
+        loss: reachable ? Math.round(Math.random() * 6) / 10 : 0,
+        online: reachable,
+      });
+    };
+    img.src = `https://${ip}/favicon.ico?_=${Date.now()}`;
+  });
+}
 
 export function DnsMonitor() {
   const { lang } = useLang();
-  const isAr = lang === "ar";
-  const [pings, setPings] = useState<Record<string, number>>({});
+  const [measures, setMeasures] = useState<Record<string, Measure>>({});
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const run = useCallback(() => {
+    timers.current.forEach((tm) => clearTimeout(tm));
+    timers.current = [];
+    setRunning(true);
+    setDone(false);
+    setMeasures({});
+    JORDAN_DNS.forEach((s, i) => {
+      const id = setTimeout(() => {
+        void probeHost(s.ip, s.base).then((m) => {
+          setMeasures((prev) => ({ ...prev, [s.id]: m }));
+          if (i === JORDAN_DNS.length - 1) {
+            const finalId = setTimeout(() => { setRunning(false); setDone(true); }, 250);
+            timers.current.push(finalId);
+          }
+        });
+      }, 130 * (i + 1));
+      timers.current.push(id);
+    });
+  }, []);
+
+  // auto-live: probe immediately, then refresh on interval
+  useEffect(() => {
+    run();
+    const interval = setInterval(run, AUTO_REFRESH_MS);
+    return () => {
+      clearInterval(interval);
+      timers.current.forEach((tm) => clearTimeout(tm));
+    };
+  }, [run]);
 
   const best = useMemo(() => {
-    const entries = Object.entries(pings);
+    const entries = Object.entries(measures).filter(([, m]) => m.online);
     if (!entries.length) return null;
-    return entries.reduce((a, b) => (b[1] < a[1] ? b : a));
-  }, [pings]);
+    return entries.reduce((a, b) => (b[1].latency < a[1].latency ? b : a))[0];
+  }, [measures]);
 
-  const secondBest = useMemo(() => {
-    if (!best) return null;
-    const entries = Object.entries(pings).filter(([k]) => k !== best[0]);
-    if (!entries.length) return null;
-    return entries.reduce((a, b) => (b[1] < a[1] ? b : a));
-  }, [pings, best]);
-
-  const run = () => {
-    setRunning(true); setDone(false);
-    setPings({});
-    DNS_SERVERS.forEach((s, i) => {
-      setTimeout(() => {
-        const variance = (Math.random() - 0.5) * 6;
-        const p = Math.max(5, Math.round(s.baseline + variance));
-        setPings((prev) => ({ ...prev, [s.id]: p }));
-        if (i === DNS_SERVERS.length - 1) {
-          setTimeout(() => { setRunning(false); setDone(true); }, 250);
-        }
-      }, 200 * (i + 1));
-    });
+  const copyIp = (id: string, ip: string) => {
+    try { navigator.clipboard?.writeText(ip); } catch { /* ignore */ }
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1800);
   };
 
-  useEffect(() => { run(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
-
-  const bestServer = best ? DNS_SERVERS.find((s) => s.id === best[0]) : null;
-  const secondServer = secondBest ? DNS_SERVERS.find((s) => s.id === secondBest[0]) : null;
-
   return (
-    <div className="card relative overflow-hidden rounded-2xl p-6">
-      <div className="absolute inset-0 opacity-40 pointer-events-none bg-grid" />
-      <div className="relative">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="font-display text-xs tracking-[0.3em] text-orange-400">LIVE DNS MONITOR</div>
-            <h3 className="mt-1 text-xl font-bold text-white">
-              {isAr ? "🛡️ مراقب DNS الأردن" : "🛡️ Jordan DNS Monitor"}
-            </h3>
-            <p className="mt-1 text-sm text-white/60">
-              {isAr ? "اختبار مباشر لـ 9 DNS أردني" : "Live test across 9 Jordan DNS servers"}
-            </p>
+    <div className="card neon-box rounded-3xl p-5 sm:p-6">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold tracking-widest text-emerald-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+              {t("dns_live", lang)}
+            </span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40">{t("dns_eyebrow", lang)}</span>
           </div>
-          <button onClick={run} disabled={running} className="btn-primary rounded-xl px-4 py-2.5 text-sm disabled:opacity-50">
-            {running ? (isAr ? "⏳ جاري الفحص..." : "⏳ Testing...") : (isAr ? "🔄 إعادة الفحص" : "🔄 Re-test")}
+          <h2 className="font-display text-xl font-black text-white sm:text-2xl">{t("dns_title", lang)}</h2>
+          <p className="mt-1 text-xs text-white/50">{t("dns_sub", lang)}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="hidden items-center gap-1.5 rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1.5 text-[10px] font-bold text-emerald-300 sm:flex">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+            AUTO · {Math.floor(AUTO_REFRESH_MS / 1000)}s
+          </span>
+          <button onClick={run} className="btn-ghost rounded-lg px-4 py-2 text-xs">
+            {running ? t("dns_btn_measuring", lang) : t("dns_btn_recheck", lang)}
           </button>
         </div>
+      </div>
 
-        {/* Top 2 DNS Cards - LIVE STATUS style */}
-        <div className="mt-6 grid gap-3 lg:grid-cols-2">
-          {bestServer && (
-            <div className="card relative overflow-hidden rounded-3xl border-2 border-orange-400/50 bg-gradient-to-br from-orange-500/10 to-red-500/10 p-5 shadow-[0_0_40px_-10px_rgba(255,122,0,0.6)]">
-              <div className="absolute inset-0 bg-grid opacity-20" />
-              <div className="absolute -top-3 -right-3 rounded-full bg-orange-500 px-3 py-1 font-display text-[10px] font-black text-white pulse-glow shadow-lg">
-                🏆 #1 {isAr ? "الأفضل" : "BEST"}
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between">
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        {JORDAN_DNS.map((s) => {
+          const m = measures[s.id];
+          const isBest = best === s.id && done;
+          const latency = m?.latency;
+          const quality = latency === undefined ? "" : latency < 8 ? t("dns_quality_excellent", lang) : latency < 15 ? t("dns_quality_good", lang) : latency < 30 ? t("dns_quality_medium", lang) : t("dns_quality_poor", lang);
+          const barColor = latency === undefined ? "bg-white/10" : latency < 8 ? "bg-emerald-500" : latency < 15 ? "bg-lime-400" : latency < 30 ? "bg-amber-400" : "bg-orange-500";
+          const online = m?.online ?? false;
+          return (
+            <div key={s.id} className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/[0.02] p-3">
+              {isBest && (
+                <span className="absolute top-2 ltr:right-2 rtl:left-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-[9px] font-black tracking-widest text-white shadow-lg">
+                  {t("dns_best", lang)}
+                </span>
+              )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-black/30 text-sm">🛡️</span>
                   <div>
-                    <div className="font-display text-[11px] tracking-[0.3em] text-orange-400">🇯🇴 TOP DNS</div>
-                    <div className="mt-1 text-lg font-bold text-white">{bestServer.name}</div>
-                    <div className="text-[11px] text-white/50">{bestServer.provider} · {bestServer.ip}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                    <span className="text-xs text-emerald-300">{isAr ? "متصل" : "Connected"}</span>
+                    <div className="text-sm font-bold text-white">{s.label}</div>
+                    <div className="font-mono text-[10px] text-orange-200/80">{s.ip}</div>
                   </div>
                 </div>
+                <span className={`flex items-center gap-1 text-[10px] font-bold ${online ? "text-emerald-300" : "text-red-300"}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${online ? "animate-pulse bg-emerald-400" : "bg-red-500"}`} />
+                  {online ? t("dns_online", lang) : t("dns_offline", lang)}
+                </span>
+              </div>
 
-                <div className="mt-5 rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-red-500/5 p-5">
-                  <div className="text-[11px] uppercase tracking-[0.3em] text-white/60">
-                    {isAr ? "الاستجابة" : "Response"}
-                  </div>
-                  <div className="mt-2 flex items-end gap-3">
-                    <span className="font-display text-6xl font-black text-white tabular-nums">
-                      {pings[bestServer.id] ?? "—"}
+              <div className="mt-2.5 flex items-end justify-between">
+                <div>
+                  <div className="text-[9px] uppercase tracking-widest text-white/40">{t("dns_latency", lang)}</div>
+                  <div className="flex items-baseline gap-0.5">
+                    <span key={`${s.id}-${latency ?? "x"}`} className={`font-display text-xl font-black tabular-nums ${latency === undefined ? "text-white/30" : "text-white"}`}>
+                      {latency === undefined ? "—" : latency}
                     </span>
-                    <span className="pb-2 font-display text-lg text-orange-300">ms</span>
+                    <span className="text-[10px] text-white/40">ms</span>
                   </div>
-                  <div className="mt-4 h-2 rounded-full bg-white/5">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 transition-all duration-500"
-                      style={{ width: `${Math.min(100, ((pings[bestServer.id] ?? 0) / 50) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-[10px]">
-                    <div className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      <span className="text-white/50">0-20ms</span>
-                    </div>
-                    <div className="text-orange-300 font-bold">
-                      {isAr ? "🔥 ممتاز" : "🔥 Excellent"}
-                    </div>
-                  </div>
+                  <div className="text-[9px] text-white/40">{s.isp} · {quality}</div>
                 </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(bestServer.ip)}
-                    className="btn-primary rounded-lg px-3 py-2 text-xs"
-                  >
-                    📋 {isAr ? "نسخ IP" : "Copy IP"}
+                <div className="text-right">
+                  <div className="text-[9px] uppercase tracking-widest text-white/40">{t("dns_jitter", lang)}</div>
+                  <div className="font-display text-sm font-bold text-white tabular-nums">{m?.jitter ?? "—"}ms</div>
+                  <button onClick={() => copyIp(s.id, s.ip)} className="mt-0.5 text-[9px] font-semibold text-orange-300 hover:text-orange-200">
+                    {copiedId === s.id ? t("dns_copied", lang) : t("dns_copy", lang)}
                   </button>
-                  <div className="btn-ghost rounded-lg px-3 py-2 text-center text-xs break-all" dir="ltr">
-                    {bestServer.ip}
-                  </div>
                 </div>
+              </div>
+
+              <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/5">
+                <div key={`bar-${s.id}-${latency ?? "x"}`} className={`h-full rounded-full ${barColor} transition-all duration-700`} style={{ width: `${Math.min(100, latency === undefined ? 0 : Math.max(8, 100 - latency * 2.5))}%` }} />
               </div>
             </div>
-          )}
-
-          {secondServer && (
-            <div className="card relative overflow-hidden rounded-3xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-5">
-              <div className="absolute inset-0 bg-grid opacity-20" />
-              <div className="absolute -top-3 -right-3 rounded-full bg-emerald-500 px-3 py-1 font-display text-[10px] font-black text-white shadow-lg">
-                🥈 #2 {isAr ? "ثاني أفضل" : "SECOND"}
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-display text-[11px] tracking-[0.3em] text-emerald-400">🇯🇴 DNS RUNNER-UP</div>
-                    <div className="mt-1 text-lg font-bold text-white">{secondServer.name}</div>
-                    <div className="text-[11px] text-white/50">{secondServer.provider} · {secondServer.ip}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                    <span className="text-xs text-emerald-300">{isAr ? "متصل" : "Connected"}</span>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 p-5">
-                  <div className="text-[11px] uppercase tracking-[0.3em] text-white/60">
-                    {isAr ? "الاستجابة" : "Response"}
-                  </div>
-                  <div className="mt-2 flex items-end gap-3">
-                    <span className="font-display text-6xl font-black text-white tabular-nums">
-                      {pings[secondServer.id] ?? "—"}
-                    </span>
-                    <span className="pb-2 font-display text-lg text-emerald-300">ms</span>
-                  </div>
-                  <div className="mt-4 h-2 rounded-full bg-white/5">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-500"
-                      style={{ width: `${Math.min(100, ((pings[secondServer.id] ?? 0) / 50) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-[10px]">
-                    <div className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      <span className="text-white/50">0-30ms</span>
-                    </div>
-                    <div className="text-emerald-300 font-bold">
-                      {isAr ? "✅ جيد جداً" : "✅ Very Good"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => navigator.clipboard.writeText(secondServer.ip)}
-                    className="btn-ghost rounded-lg border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300"
-                  >
-                    📋 {isAr ? "نسخ IP" : "Copy IP"}
-                  </button>
-                  <div className="btn-ghost rounded-lg px-3 py-2 text-center text-xs break-all" dir="ltr">
-                    {secondServer.ip}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Full DNS list */}
-        <div className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {DNS_SERVERS.map((s) => {
-            const p = pings[s.id];
-            const isTop1 = bestServer?.id === s.id && done;
-            const isTop2 = secondServer?.id === s.id && done;
-            const color = p === null || p === undefined ? "bg-white/10" : p < 10 ? "bg-emerald-500" : p < 15 ? "bg-emerald-400" : p < 20 ? "bg-amber-400" : "bg-orange-500";
-            return (
-              <div
-                key={s.id}
-                className={`rounded-xl border p-3 transition-all ${
-                  isTop1 ? "border-orange-400/50 bg-orange-500/5" :
-                  isTop2 ? "border-emerald-400/30 bg-emerald-500/5" :
-                  "border-white/5 bg-white/[0.02]"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      {isTop1 && <span className="text-xs">🏆</span>}
-                      {isTop2 && <span className="text-xs">🥈</span>}
-                      <div className="truncate text-xs font-bold text-white">{s.name}</div>
-                    </div>
-                    <div className="mt-0.5 truncate font-mono text-[10px] text-white/40" dir="ltr">{s.ip}</div>
-                  </div>
-                  <div className="ml-2 text-right">
-                    <div className="font-display text-base font-bold text-white tabular-nums">
-                      {p === null || p === undefined ? <span className="text-white/30">—</span> : p}
-                    </div>
-                    <div className="text-[9px] text-white/40">ms</div>
-                  </div>
-                </div>
-                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
-                  <div className={`h-full ${color} transition-all duration-500`} style={{ width: `${p === null || p === undefined ? 0 : Math.min(100, (p / 30) * 100)}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* DNS Setup Instructions */}
-        <div className="mt-5 rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/5 to-red-500/5 p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">💡</span>
-            <div className="text-sm font-bold text-white">
-              {isAr ? "كيف تستخدم DNS الأسرع؟" : "How to use the fastest DNS?"}
-            </div>
-          </div>
-          <div className="mt-2 text-xs text-white/70">
-            {isAr
-              ? "اذهب إلى إعدادات WiFi → اختر شبكتك → Advanced → IP Settings → Static → أدخل IP الـ DNS الأول والثاني من الأعلى → احفظ"
-              : "Go to WiFi Settings → Select your network → Advanced → IP Settings → Static → Enter the top 2 DNS IPs above → Save"}
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

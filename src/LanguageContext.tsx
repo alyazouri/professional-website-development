@@ -11,7 +11,9 @@ export const LANGUAGES: { id: Lang; name: string; flag: string; dir: "rtl" | "lt
 ];
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; dir: "rtl" | "ltr" };
+
 const LanguageContext = createContext<Ctx | null>(null);
+
 const LS_KEY = "alyazouri_lang";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -27,12 +29,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (nav.startsWith("en")) return "en";
     return "ar";
   });
+
   const dir = LANGUAGES.find((l) => l.id === lang)?.dir ?? "rtl";
 
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = dir;
-    try { localStorage.setItem(LS_KEY, lang); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(LS_KEY, lang);
+    } catch { /* ignore */ }
   }, [lang, dir]);
 
   return (

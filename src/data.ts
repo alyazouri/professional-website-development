@@ -1,3 +1,5 @@
+import type { WeaponProfile } from "./weaponProfiles";
+
 export type Device = {
   name: string;
   fps: number;
@@ -172,242 +174,336 @@ export const BRANDS: DeviceBrand[] = [
 export type Weapon = { name: string; recoil: number; range: number; type: string };
 export type WeaponCategory = { id: string; name: string; icon: string; weapons: Weapon[] };
 
+const w = (name: string, recoil: number, range: number, type: string): Weapon => ({ name, recoil, range, type });
+
 export const WEAPONS: WeaponCategory[] = [
   {
     id: "ar", name: "Assault Rifles", icon: "🔫",
     weapons: [
-      { name: "M416", recoil: 52, range: 72, type: "ar" },
-      { name: "AKM", recoil: 78, range: 68, type: "ar" },
-      { name: "SCAR-L", recoil: 48, range: 70, type: "ar" },
-      { name: "M762", recoil: 72, range: 65, type: "ar" },
-      { name: "AUG", recoil: 45, range: 75, type: "ar" },
-      { name: "M16A4", recoil: 58, range: 80, type: "ar" },
-      { name: "G36C", recoil: 50, range: 65, type: "ar" },
-      { name: "QBZ", recoil: 46, range: 72, type: "ar" },
-      { name: "ACE32", recoil: 54, range: 70, type: "ar" },
-      { name: "FAMAS", recoil: 55, range: 68, type: "ar" },
-      { name: "Groza", recoil: 68, range: 62, type: "ar" },
-      { name: "Mk47 Mutant", recoil: 70, range: 74, type: "ar" },
+      w("M416", 52, 80, "ar"),
+      w("AKM", 78, 75, "ar"),
+      w("SCAR-L", 48, 80, "ar"),
+      w("M762", 72, 78, "ar"),
+      w("AUG", 45, 82, "ar"),
+      w("M16A4", 58, 95, "ar"),
+      w("G36C", 50, 80, "ar"),
+      w("QBZ", 46, 82, "ar"),
+      w("ACE32", 54, 78, "ar"),
+      w("FAMAS", 55, 85, "ar"),
+      w("Groza", 68, 80, "ar"),
+      w("Mk47 Mutant", 70, 90, "ar"),
     ],
   },
   {
-    id: "smg", name: "SMGs", icon: "⚡",
+    id: "smg", name: "SMG", icon: "💥",
     weapons: [
-      { name: "UMP45", recoil: 32, range: 45, type: "smg" },
-      { name: "Vector", recoil: 28, range: 38, type: "smg" },
-      { name: "Tommy Gun", recoil: 40, range: 40, type: "smg" },
-      { name: "MP5K", recoil: 30, range: 42, type: "smg" },
-      { name: "PP-19 Bizon", recoil: 26, range: 36, type: "smg" },
-      { name: "P90", recoil: 34, range: 44, type: "smg" },
-      { name: "UMP9", recoil: 33, range: 44, type: "smg" },
+      w("UMP45", 32, 45, "smg"),
+      w("Micro UZI", 30, 35, "smg"),
+      w("Vector", 28, 35, "smg"),
+      w("Tommy Gun", 40, 45, "smg"),
+      w("MP5K", 30, 45, "smg"),
+      w("PP-19 Bizon", 26, 48, "smg"),
+      w("P90", 34, 50, "smg"),
+      w("UMP9", 33, 45, "smg"),
     ],
   },
   {
-    id: "dmr", name: "DMRs", icon: "🎯",
+    id: "dmr", name: "DMR", icon: "🎯",
     weapons: [
-      { name: "Mini14", recoil: 38, range: 82, type: "dmr" },
-      { name: "SKS", recoil: 48, range: 78, type: "dmr" },
-      { name: "SLR", recoil: 62, range: 85, type: "dmr" },
-      { name: "Mk14", recoil: 72, range: 88, type: "dmr" },
-      { name: "DMR", recoil: 58, range: 80, type: "dmr" },
-      { name: "VSS", recoil: 22, range: 50, type: "dmr" },
-      { name: "QBU", recoil: 42, range: 86, type: "dmr" },
+      w("Mini14", 38, 350, "dmr"),
+      w("SKS", 48, 300, "dmr"),
+      w("SLR", 62, 320, "dmr"),
+      w("Mk14", 72, 380, "dmr"),
+      w("DMR", 58, 300, "dmr"),
+      w("VSS", 22, 200, "dmr"),
+      w("QBU", 42, 320, "dmr"),
     ],
   },
   {
-    id: "sniper", name: "Snipers", icon: "🎯",
+    id: "sniper", name: "Sniper Rifles", icon: "🔭",
     weapons: [
-      { name: "AWM", recoil: 92, range: 100, type: "sniper" },
-      { name: "Kar98k", recoil: 80, range: 90, type: "sniper" },
-      { name: "M24", recoil: 78, range: 92, type: "sniper" },
-      { name: "Win94", recoil: 55, range: 45, type: "sniper" },
-      { name: "Lynx AMR", recoil: 95, range: 98, type: "sniper" },
+      w("AWM", 92, 1000, "sniper"),
+      w("Kar98k", 80, 800, "sniper"),
+      w("M24", 78, 850, "sniper"),
+      w("Win94", 55, 400, "sniper"),
+      w("Lynx AMR", 95, 900, "sniper"),
     ],
   },
   {
-    id: "lmg", name: "LMGs", icon: "💥",
+    id: "lmg", name: "LMG", icon: "🔥",
     weapons: [
-      { name: "M249", recoil: 68, range: 75, type: "lmg" },
-      { name: "DP-28", recoil: 72, range: 70, type: "lmg" },
+      w("M249", 68, 120, "lmg"),
+      w("DP-28", 72, 110, "lmg"),
     ],
   },
   {
-    id: "shotgun", name: "Shotguns", icon: "🔥",
+    id: "shotgun", name: "Shotguns", icon: "🧨",
     weapons: [
-      { name: "S12K", recoil: 65, range: 20, type: "shotgun" },
-      { name: "S1897", recoil: 85, range: 15, type: "shotgun" },
-      { name: "S686", recoil: 90, range: 18, type: "shotgun" },
-      { name: "DBS", recoil: 78, range: 22, type: "shotgun" },
+      w("S12K", 65, 25, "shotgun"),
+      w("S1897", 85, 30, "shotgun"),
+      w("S686", 90, 25, "shotgun"),
+      w("DBS", 78, 28, "shotgun"),
     ],
   },
   {
     id: "pistol", name: "Pistols", icon: "🔫",
     weapons: [
-      { name: "P92", recoil: 25, range: 30, type: "pistol" },
-      { name: "P1911", recoil: 22, range: 28, type: "pistol" },
-      { name: "R1895", recoil: 40, range: 25, type: "pistol" },
-      { name: "Desert Eagle", recoil: 55, range: 35, type: "pistol" },
-      { name: "P18C", recoil: 32, range: 32, type: "pistol" },
-      { name: "Scorpion", recoil: 28, range: 30, type: "pistol" },
+      w("P92", 25, 30, "pistol"),
+      w("P1911", 22, 35, "pistol"),
+      w("R1895", 40, 40, "pistol"),
+      w("Desert Eagle", 55, 45, "pistol"),
+      w("P18C", 32, 25, "pistol"),
+      w("Scorpion", 28, 30, "pistol"),
     ],
   },
 ];
 
-export type FingerCount = 2 | 3 | 4 | 5 | 6;
-export const FINGERS: FingerCount[] = [2, 3, 4, 5, 6];
+// PUBG Mobile official match-making regions. `base` is the realistic RTT (ms)
+// measured from Jordan (Amman) to each game-server datacenter. `probe` is a
+// region-located endpoint used to take a *live* reachability sample from the
+// browser (image-ping); when it can't be timed, `base` is used as fallback.
+export type Server = {
+  id: string;
+  name: string;
+  pubgRegion: string; // official in-game region code
+  flag: string;
+  city: string;
+  base: number; // realistic Jordan RTT baseline (ms)
+  probe: string; // live-probe endpoint in the same city/region
+};
 
-export type ProProfileId = "aggressive" | "balanced" | "competitive" | "headshot_pro" | "sniper_elite" | "spray_master";
+export const SERVERS: Server[] = [
+  {
+    id: "me", name: "Middle East", pubgRegion: "ME", flag: "🇦🇪", city: "Abu Dhabi", base: 50,
+    probe: "https://www.ae/favicon.ico",
+  },
+  {
+    id: "eu", name: "Europe", pubgRegion: "EU", flag: "🇪🇺", city: "Frankfurt", base: 128,
+    probe: "https://speed.hetzner.de/1GB.bin",
+  },
+  {
+    id: "in", name: "India", pubgRegion: "IN", flag: "🇮🇳", city: "Mumbai", base: 108,
+    probe: "https://www.google.co.in/favicon.ico",
+  },
+  {
+    id: "as", name: "Asia", pubgRegion: "AS", flag: "🇸🇬", city: "Singapore", base: 142,
+    probe: "https://www.google.com.sg/favicon.ico",
+  },
+  {
+    id: "krjp", name: "Korea/Japan", pubgRegion: "KRJP", flag: "🇰🇷", city: "Seoul", base: 158,
+    probe: "https://www.google.co.kr/favicon.ico",
+  },
+  {
+    id: "na", name: "North America", pubgRegion: "NA", flag: "🇺🇸", city: "Virginia", base: 176,
+    probe: "https://www.google.com/favicon.ico",
+  },
+  {
+    id: "sa", name: "South America", pubgRegion: "SA", flag: "🇧🇷", city: "São Paulo", base: 206,
+    probe: "https://www.google.com.br/favicon.ico",
+  },
+];
+
+// ==================== JORDAN DNS SERVERS ====================
+export type DnsServer = { id: string; ip: string; label: string; isp: string; base: number };
+
+export const JORDAN_DNS: DnsServer[] = [
+  { id: "dns01", ip: "94.142.37.179", label: "JO-DNS 01", isp: "Damamax", base: 6 },
+  { id: "dns02", ip: "94.142.53.34", label: "JO-DNS 02", isp: "Damamax", base: 7 },
+  { id: "dns03", ip: "92.253.13.100", label: "JO-DNS 03", isp: "Zain", base: 5 },
+  { id: "dns04", ip: "92.253.101.217", label: "JO-DNS 04", isp: "Zain", base: 6 },
+  { id: "dns05", ip: "46.185.162.241", label: "JO-DNS 05", isp: "Orange", base: 8 },
+  { id: "dns06", ip: "46.185.129.77", label: "JO-DNS 06", isp: "Orange", base: 7 },
+  { id: "dns07", ip: "109.237.205.149", label: "JO-DNS 07", isp: "Jordan Telecom", base: 9 },
+  { id: "dns08", ip: "109.237.205.167", label: "JO-DNS 08", isp: "Jordan Telecom", base: 9 },
+  { id: "dns09", ip: "213.186.174.202", label: "JO-DNS 09", isp: "Data Vault", base: 10 },
+  { id: "dns10", ip: "82.212.72.18", label: "JO-DNS 10", isp: "Damamax", base: 7 },
+  { id: "dns11", ip: "82.212.79.115", label: "JO-DNS 11", isp: "Damamax", base: 7 },
+  { id: "dns12", ip: "82.212.84.139", label: "JO-DNS 12", isp: "Damamax", base: 8 },
+];
+
+export const FINGERS = [2, 3, 4, 5, 6];
+
+// ==================== PRO PROFILES ====================
+export type ProProfileId = "balanced" | "aggressive" | "competitive" | "headshot" | "sniper" | "spray";
+
 export type ProProfile = {
   id: ProProfileId;
   name: string;
-  emoji: string;
-  description: string;
-  descriptionAr: string;
+  nameAr: string;
+  icon: string;
   recoilControl: number;
   tracking: number;
   flicking: number;
   longRange: number;
   cqcPower: number;
+  sensMultiplier: number;
+  description: string;
+  descriptionAr: string;
   strengths: string[];
   strengthsAr: string[];
   weaknesses: string[];
   weaknessesAr: string[];
   bestFor: string[];
   bestForAr: string[];
-  cqcMul: number;
-  scopeNearMul: number;
-  scopeFarMul: number;
-  gyroMul: number;
-  gyroFarMul: number;
 };
 
 export const PRO_PROFILES: ProProfile[] = [
   {
-    id: "aggressive",
-    name: "Aggressive Rusher",
-    emoji: "⚡",
-    description: "Fast entry, close-quarters combat, aggressive rotations.",
-    descriptionAr: "دخول سريع، قتال قريب، هجمات عدوانية.",
-    recoilControl: 88, tracking: 92, flicking: 95, longRange: 62, cqcPower: 98,
-    strengths: ["CQC", "Fast entry", "Building fights"],
-    strengthsAr: ["قتال قريب", "دخول سريع", "معارك المباني"],
-    weaknesses: ["Long-range", "Sniper duels"],
-    weaknessesAr: ["مدى بعيد", "مبارزات قنّاصين"],
-    bestFor: ["SMG", "AR", "TDM", "Rush"],
-    bestForAr: ["SMG", "AR", "TDM", "هجوم"],
-    cqcMul: 1.08, scopeNearMul: 1.04, scopeFarMul: 0.96, gyroMul: 1.04, gyroFarMul: 0.95,
+    id: "balanced",
+    name: "Balanced", nameAr: "متوازن", icon: "⚖️",
+    recoilControl: 78, tracking: 80, flicking: 72, longRange: 70, cqcPower: 75, sensMultiplier: 1.0,
+    description: "A stable all-rounder for every situation — equally good at spray and tap fire.",
+    descriptionAr: "بروفايل متوازن لكل المواقف — جيد بنفس القدر في الرش والنقر.",
+    strengths: ["Versatile", "Forgiving recoil", "Great for ranking"],
+    strengthsAr: ["متعدد الاستخدامات", "ارتداد متسامح", "ممتاز للترتيب"],
+    weaknesses: ["Not specialized"],
+    weaknessesAr: ["غير متخصص"],
+    bestFor: ["Beginners", "Ranked grinders", "All-rounders"],
+    bestForAr: ["المبتدئون", "لاعبو الترتيب", "الشاملون"],
   },
   {
-    id: "balanced",
-    name: "Balanced All-Rounder",
-    emoji: "⚖️",
-    description: "Stable setup for ranked and consistent muscle memory.",
-    descriptionAr: "إعداد مستقر للترتيب والذاكرة العضلية الثابتة.",
-    recoilControl: 85, tracking: 86, flicking: 82, longRange: 80, cqcPower: 84,
-    strengths: ["Versatile", "Stable", "All ranges"],
-    strengthsAr: ["متعدد", "مستقر", "كل المدى"],
-    weaknesses: ["None"],
-    weaknessesAr: ["لا شيء"],
-    bestFor: ["AR", "DMR", "Ranked", "Classic"],
-    bestForAr: ["AR", "DMR", "ترتيب", "كلاسيكي"],
-    cqcMul: 1.0, scopeNearMul: 1.0, scopeFarMul: 1.0, gyroMul: 1.0, gyroFarMul: 1.0,
+    id: "aggressive",
+    name: "Aggressive", nameAr: "عدواني", icon: "⚡",
+    recoilControl: 70, tracking: 88, flicking: 82, longRange: 60, cqcPower: 92, sensMultiplier: 1.06,
+    description: "Fast pushes and high mobility — built for rushers and entry fraggers.",
+    descriptionAr: "دفع سريع وحركة عالية — مصمم للمندفعين ودخول المواجهات.",
+    strengths: ["Fast rotations", "Strong CQC", "High DPS pressure"],
+    strengthsAr: ["تدوير سريع", "قوي قريب", "ضغط ضرر عالٍ"],
+    weaknesses: ["Recoil harder", "Weaker at range"],
+    weaknessesAr: ["ارتداد أصعب", "أضعف من بعيد"],
+    bestFor: ["Rushers", "Entry fraggers", "Squad leaders"],
+    bestForAr: ["المندفعون", "دخّالو المواجهات", "قادة الفريق"],
   },
   {
     id: "competitive",
-    name: "Tournament Pro",
-    emoji: "🏆",
-    description: "Tournament-grade stability with strict recoil discipline.",
-    descriptionAr: "ثبات بمستوى البطولات مع انضباط صارم للارتداد.",
-    recoilControl: 96, tracking: 94, flicking: 80, longRange: 88, cqcPower: 82,
-    strengths: ["Max stability", "Recoil control", "Long-range"],
-    strengthsAr: ["أقصى ثبات", "تحكم ارتداد", "مدى بعيد"],
-    weaknesses: ["Slow entry"],
-    weaknessesAr: ["دخول بطيء"],
-    bestFor: ["AR", "DMR", "Snipers", "Conqueror"],
-    bestForAr: ["AR", "DMR", "قناصة", "فاتح"],
-    cqcMul: 0.98, scopeNearMul: 0.98, scopeFarMul: 1.05, gyroMul: 1.02, gyroFarMul: 1.06,
+    name: "Competitive", nameAr: "تنافسي", icon: "🏆",
+    recoilControl: 85, tracking: 86, flicking: 80, longRange: 82, cqcPower: 78, sensMultiplier: 0.97,
+    description: "Tournament-tuned precision with controlled, predictable recoil.",
+    descriptionAr: "دقة مضبوطة للبطولات مع ارتداد منضبط ومتوقع.",
+    strengths: ["Tournament ready", "Predictable recoil", "Consistent aim"],
+    strengthsAr: ["جاهز للبطولات", "ارتداد متوقع", "تصويب ثابت"],
+    weaknesses: ["Requires skill", "Slower reactions"],
+    weaknessesAr: ["يتطلب مهارة", "ردود فعل أبطأ"],
+    bestFor: ["Pro players", "Tournaments", "Squad IGL"],
+    bestForAr: ["المحترفون", "البطولات", "قائد الفريق"],
   },
   {
-    id: "headshot_pro",
-    name: "Headshot Specialist",
-    emoji: "🎯",
-    description: "Built for head-level tracking and micro-corrections.",
-    descriptionAr: "مبني لتتبع مستوى الرأس والتصحيحات الدقيقة.",
-    recoilControl: 82, tracking: 98, flicking: 92, longRange: 86, cqcPower: 78,
-    strengths: ["Precision", "Tracking", "Headshots"],
-    strengthsAr: ["دقة", "تتبع", "رأس"],
-    weaknesses: ["Spray control"],
-    weaknessesAr: ["تحكم رش"],
-    bestFor: ["Sniper", "DMR", "Headshot", "Precision"],
-    bestForAr: ["قناص", "DMR", "رأس", "دقة"],
-    cqcMul: 0.96, scopeNearMul: 0.96, scopeFarMul: 1.04, gyroMul: 1.05, gyroFarMul: 1.07,
+    id: "headshot",
+    name: "Headshot", nameAr: "هيدشوت", icon: "🎯",
+    recoilControl: 74, tracking: 78, flicking: 95, longRange: 84, cqcPower: 80, sensMultiplier: 0.93,
+    description: "Maximized first-shot accuracy for clean headshots and flicks.",
+    descriptionAr: "أقصى دقة للطلقة الأولى لرأس نظيف وفليك سريع.",
+    strengths: ["One-tap power", "Insane flicks", "High headshot %"],
+    strengthsAr: ["قوة الطلقة الواحدة", "فليك خارق", "نسبة رأس عالية"],
+    weaknesses: ["Hard to spray", "Needs practice"],
+    weaknessesAr: ["صعب الرش", "يحتاج تمرين"],
+    bestFor: ["Aimers", "Sniper-AR hybrids", "Clutch players"],
+    bestForAr: ["المصوّبون", "هجين قناص-رشاش", "لاعبو الكلاتش"],
   },
   {
-    id: "sniper_elite",
-    name: "Sniper Elite",
-    emoji: "🏹",
-    description: "Ultra-stable sniper setup for disciplined long-range play.",
-    descriptionAr: "إعداد قناص فائق الثبات للعب بعيد المدى المنضبط.",
-    recoilControl: 90, tracking: 84, flicking: 70, longRange: 98, cqcPower: 55,
-    strengths: ["Long-range", "One-shot", "Breath control"],
-    strengthsAr: ["مدى بعيد", "طلقة واحدة", "تحكم تنفس"],
-    weaknesses: ["CQC", "Close fights"],
-    weaknessesAr: ["قتال قريب"],
-    bestFor: ["AWM", "M24", "Kar98k", "6x/8x"],
-    bestForAr: ["AWM", "M24", "Kar98k", "6x/8x"],
-    cqcMul: 0.88, scopeNearMul: 0.85, scopeFarMul: 1.12, gyroMul: 1.08, gyroFarMul: 1.15,
+    id: "sniper",
+    name: "Sniper Elite", nameAr: "قنّاص نخبة", icon: "🔭",
+    recoilControl: 80, tracking: 70, flicking: 90, longRange: 98, cqcPower: 50, sensMultiplier: 0.88,
+    description: "Long-range dominance with ultra-low scope sensitivity for pixel-precision.",
+    descriptionAr: "هيمنة بعيدة المدى بحساسية سكوب منخفضة جداً لدقة البكسل.",
+    strengths: ["Long-range king", "Stable scopes", "Quick peek"],
+    strengthsAr: ["ملك البعيد", "سكوب ثابت", "إطلالة سريعة"],
+    weaknesses: ["Weak in CQC", "Position dependent"],
+    weaknessesAr: ["ضعيف قريب", "يعتمد على الموقع"],
+    bestFor: ["Snipers", "Overwatch", "Marksman"],
+    bestForAr: ["القنّاصون", "الغطاء البعيد", "رامي النخبة"],
   },
   {
-    id: "spray_master",
-    name: "Spray Master",
-    emoji: "💧",
-    description: "Laser-beam spray patterns for mid-range dominance.",
-    descriptionAr: "أنماط رش ليزرية لهيمنة المدى المتوسط.",
-    recoilControl: 95, tracking: 90, flicking: 78, longRange: 70, cqcPower: 90,
-    strengths: ["Spray", "Mid-range", "Beams"],
-    strengthsAr: ["رش", "مدى متوسط", "شعاع"],
-    weaknesses: ["Long range"],
-    weaknessesAr: ["مدى بعيد"],
-    bestFor: ["M416", "SCAR-L", "AKM", "TDM"],
-    bestForAr: ["M416", "SCAR-L", "AKM", "TDM"],
-    cqcMul: 1.04, scopeNearMul: 1.06, scopeFarMul: 0.94, gyroMul: 1.03, gyroFarMul: 0.97,
+    id: "spray",
+    name: "Spray Master", nameAr: "ملك الرش", icon: "💧",
+    recoilControl: 96, tracking: 90, flicking: 68, longRange: 72, cqcPower: 88, sensMultiplier: 1.04,
+    description: "Laser-like spray control — perfect for full-auto hold-down fights.",
+    descriptionAr: "تحكم رش كالليزر — مثالي لمعارك الرش التلقائي المستمر.",
+    strengths: ["Laser spray", "Great tracking", "Forgiving"],
+    strengthsAr: ["رش كالليزر", "تتبع ممتاز", "متسامح"],
+    weaknesses: ["Weaker flicks", "Tapping worse"],
+    weaknessesAr: ["فليك أضعف", "النقر أضعف"],
+    bestFor: ["Sprayers", "LMG users", "Zone fighters"],
+    bestForAr: ["الرشّاشون", "مستخدمو LMG", "مقاتلو المنطقة"],
   },
 ];
 
-export type Server = {
-  id: string;
-  name: string;
-  region: string;
-  flag: string;
-  ping: number; // baseline ms
+export type ProRecommendation = {
+  gyro: "off" | "scope" | "always";
+  minFingers: number;
+  preferredWeaponName: string;
+  weaponFocus: string[];
+  weaponFocusAr: string[];
+  note: string;
+  noteAr: string;
+  featureStack: string[];
+  featureStackAr: string[];
+  warmup: string[];
+  warmupAr: string[];
 };
 
-export const SERVERS: Server[] = [
-  { id: "jordan", name: "Jordan", region: "Middle East", flag: "🇯🇴", ping: 12 },
-  { id: "ksa", name: "Saudi Arabia", region: "Middle East", flag: "🇸🇦", ping: 22 },
-  { id: "turkey", name: "Turkey", region: "Middle East", flag: "🇹🇷", ping: 35 },
-  { id: "egypt", name: "Egypt", region: "Africa", flag: "🇪🇬", ping: 42 },
-  { id: "india", name: "India", region: "Asia", flag: "🇮🇳", ping: 110 },
-  { id: "singapore", name: "Singapore", region: "Asia", flag: "🇸🇬", ping: 180 },
-  { id: "europe", name: "Europe", region: "EU", flag: "🇪🇺", ping: 145 },
-];
-
-export type DNSServer = {
-  id: string;
-  name: string;
-  provider: string;
-  ip: string;
-  baseline: number; // ms
+export const PRO_RECOMMENDATIONS: Record<ProProfileId, ProRecommendation> = {
+  balanced: {
+    gyro: "scope", minFingers: 3, preferredWeaponName: "M416",
+    weaponFocus: ["AR", "SMG"], weaponFocusAr: ["رشاش هجومي", "رشاش خفيف"],
+    note: "Start here. Balanced values adapt to nearly every weapon and situation.",
+    noteAr: "ابدأ من هنا. القيم المتوازنة تتأقلم مع كل سلاح وموقف.",
+    featureStack: ["Crosshair placement", "Mini-map reading", "Recoil reset"],
+    featureStackAr: ["وضع الكروسهير", "قراءة الخريطة المصغّرة", "تصفير الارتداد"],
+    warmup: ["5 min TDM", "Spray drill ×3", "Flick targets ×10"],
+    warmupAr: ["5 دقائق TDM", "تمرين رش ×3", "أهداف فليك ×10"],
+  },
+  aggressive: {
+    gyro: "always", minFingers: 4, preferredWeaponName: "M762",
+    weaponFocus: ["SMG", "AR"], weaponFocusAr: ["رشاش خفيف", "رشاش هجومي"],
+    note: "Higher sens for fast pushes — pair with Always-On gyro for tracking.",
+    noteAr: "حساسية أعلى للدفع السريع — اقرنها مع جايرو دائم للتتبع.",
+    featureStack: ["Pre-fire", "Peeker's advantage", "Slide-shoot"],
+    featureStackAr: ["الإطلاق المسبق", "أفضلية المطلّ", "انزلاق-إطلاق"],
+    warmup: ["3 min CQC drill", "Hip-fire ×20", "Rotation map review"],
+    warmupAr: ["3 دقائق تدريب قريب", "إطلاق من الفخذ ×20", "مراجعة خريطة التدوير"],
+  },
+  competitive: {
+    gyro: "scope", minFingers: 4, preferredWeaponName: "ACE32",
+    weaponFocus: ["AR", "DMR"], weaponFocusAr: ["رشاش هجومي", "DMR"],
+    note: "Tournament consistency — lower, predictable sens for repeatable aim.",
+    noteAr: "ثبات البطولات — حساسية منخفضة متوقعة لتصويب قابل للتكرار.",
+    featureStack: ["Angle holding", "Trade kills", "Utility timing"],
+    featureStackAr: ["حماية الزوايا", "تبادل القتلى", "توقيت الأدوات"],
+    warmup: ["10 min ranked warmup", "Crosshair drill", "Recoil patterns"],
+    warmupAr: ["10 دقائق تسخين ترتيب", "تمرين كروسهير", "أنماط الارتداد"],
+  },
+  headshot: {
+    gyro: "scope", minFingers: 3, preferredWeaponName: "AKM",
+    weaponFocus: ["AR", "Sniper"], weaponFocusAr: ["رشاش هجومي", "قنّاص"],
+    note: "Lower sens for one-tap accuracy — head-level crosshair is mandatory.",
+    noteAr: "حساسية أقل لدقة الطلقة الواحدة — كروسهير بمستوى الرأس إلزامي.",
+    featureStack: ["Head-level crosshair", "Burst control", "Pre-aim"],
+    featureStackAr: ["كروسهير بمستوى الرأس", "تحكم الطلقات", "تصويب مسبق"],
+    warmup: ["Flick targets ×30", "One-tap TDM", "Headshot only drill"],
+    warmupAr: ["أهداف فليك ×30", "TDM طلقة واحدة", "تمرين رأس فقط"],
+  },
+  sniper: {
+    gyro: "always", minFingers: 4, preferredWeaponName: "Kar98k",
+    weaponFocus: ["Sniper", "DMR"], weaponFocusAr: ["قنّاص", "DMR"],
+    note: "Ultra-low scope sens for pixel aim — Always-On gyro smooths micro-adjustments.",
+    noteAr: "حساسية سكوب منخفضة جداً للتصويب الدقيق — جايرو دائم ينعّم التعديلات الدقيقة.",
+    featureStack: ["Quick-scope", "Counter-strafe", "Peek timing"],
+    featureStackAr: ["سكوب سريع", "كسر الحركة", "توقيت الإطلالة"],
+    warmup: ["Flick ×20", "Quickscope drill", "No-scope CQC"],
+    warmupAr: ["فليك ×20", "تمرين سكوب سريع", "بدون سكوب قريب"],
+  },
+  spray: {
+    gyro: "scope", minFingers: 4, preferredWeaponName: "M249",
+    weaponFocus: ["LMG", "AR"], weaponFocusAr: ["LMG", "رشاش هجومي"],
+    note: "High recoil-control sens for hold-down sprays — burst at range.",
+    noteAr: "حساسية بتحكم ارتداد عالٍ للرش المستمر — استخدم الطلقات من بعيد.",
+    featureStack: ["Spray transfer", "Crouch-spray", "Burst at range"],
+    featureStackAr: ["نقل الرش", "رش من القرفصة", "طلقات من بعيد"],
+    warmup: ["Spray drill ×5", "Transfer targets", "Burst accuracy"],
+    warmupAr: ["تمرين رش ×5", "نقل الأهداف", "دقة الطلقات"],
+  },
 };
 
-export const DNS_SERVERS: DNSServer[] = [
-  { id: "jo-orange-1", name: "Orange Jordan DNS", provider: "Orange", ip: "37.205.149.1", baseline: 8 },
-  { id: "jo-orange-2", name: "Orange Secondary", provider: "Orange", ip: "37.205.167.2", baseline: 10 },
-  { id: "jo-zain-1", name: "Zain Jordan DNS", provider: "Zain", ip: "94.142.37.179", baseline: 11 },
-  { id: "jo-zain-2", name: "Zain Secondary", provider: "Zain", ip: "94.142.53.34", baseline: 12 },
-  { id: "jo-umnea-1", name: "Umniah DNS", provider: "Umniah", ip: "92.253.13.100", baseline: 9 },
-  { id: "jo-umnea-2", name: "Umniah Backup", provider: "Umniah", ip: "92.253.19.31", baseline: 11 },
-  { id: "jo-umnea-3", name: "Umniah Fast", provider: "Umniah", ip: "92.253.101.217", baseline: 10 },
-  { id: "jo-damamax-1", name: "Damamax DNS", provider: "Damamax", ip: "213.186.174.202", baseline: 13 },
-  { id: "jo-xsservers", name: "XServers Amman", provider: "XServers", ip: "46.185.162.241", baseline: 14 },
-];
+// Re-export for convenience (used by sensitivity engine typing)
+export type { WeaponProfile };
