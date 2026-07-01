@@ -20,10 +20,7 @@ const d = (name: string, fps: number, touchRate: number, screenSize: number, res
 
 export const BRANDS: DeviceBrand[] = [
   {
-    id: "apple",
-    name: "Apple",
-    icon: "🍎",
-    accent: "from-slate-300 to-slate-500",
+    id: "apple", name: "Apple", icon: "🍎", accent: "from-slate-300 to-slate-500",
     devices: [
       d("iPhone 16 Pro Max", 120, 240, 6.9, "2868×1320", "excellent"),
       d("iPhone 16 Pro", 120, 240, 6.3, "2622×1206", "excellent"),
@@ -52,10 +49,7 @@ export const BRANDS: DeviceBrand[] = [
     ],
   },
   {
-    id: "samsung",
-    name: "Samsung",
-    icon: "📱",
-    accent: "from-blue-400 to-indigo-600",
+    id: "samsung", name: "Samsung", icon: "📱", accent: "from-blue-400 to-indigo-600",
     devices: [
       d("Galaxy S25 Ultra", 120, 240, 6.9, "3120×1440", "excellent"),
       d("Galaxy S25+", 120, 240, 6.7, "3120×1440", "excellent"),
@@ -76,10 +70,7 @@ export const BRANDS: DeviceBrand[] = [
     ],
   },
   {
-    id: "xiaomi",
-    name: "Xiaomi",
-    icon: "📲",
-    accent: "from-orange-400 to-red-500",
+    id: "xiaomi", name: "Xiaomi", icon: "🔥", accent: "from-orange-400 to-red-500",
     devices: [
       d("Xiaomi 15 Ultra", 120, 240, 6.73, "3200×1440", "excellent"),
       d("Xiaomi 14 Ultra", 120, 240, 6.73, "3200×1440", "excellent"),
@@ -92,15 +83,11 @@ export const BRANDS: DeviceBrand[] = [
       d("Poco F6 Pro", 120, 480, 6.67, "3200×1440", "excellent"),
       d("Poco F6", 120, 240, 6.67, "2712×1220", "good"),
       d("Poco X6 Pro", 120, 240, 6.67, "2712×1220", "good"),
-      d("Redmi Note 13 Pro+", 120, 240, 6.67, "2712×1220", "good"),
-      d("Redmi Note 13", 120, 240, 6.67, "2400×1080", "average"),
+      d("Redmi Note 13 Pro+", 120, 240, 6.67, "2400×1080", "average"),
     ],
   },
   {
-    id: "rog",
-    name: "ASUS ROG",
-    icon: "🎮",
-    accent: "from-red-500 to-rose-700",
+    id: "rog", name: "ASUS ROG", icon: "🎮", accent: "from-red-500 to-rose-700",
     devices: [
       d("ROG Phone 9 Ultimate", 185, 720, 6.78, "2400×1080", "excellent"),
       d("ROG Phone 9 Pro", 165, 720, 6.78, "2400×1080", "excellent"),
@@ -109,10 +96,7 @@ export const BRANDS: DeviceBrand[] = [
     ],
   },
   {
-    id: "oneplus",
-    name: "OnePlus",
-    icon: "⚡",
-    accent: "from-red-400 to-pink-600",
+    id: "oneplus", name: "OnePlus", icon: "⚡", accent: "from-red-400 to-pink-600",
     devices: [
       d("OnePlus 13", 120, 240, 6.82, "3168×1440", "excellent"),
       d("OnePlus 12", 120, 240, 6.82, "3168×1440", "excellent"),
@@ -122,353 +106,308 @@ export const BRANDS: DeviceBrand[] = [
     ],
   },
   {
-    id: "oppo",
-    name: "OPPO",
-    icon: "📸",
-    accent: "from-emerald-400 to-teal-600",
+    id: "realme", name: "Realme", icon: "🟡", accent: "from-yellow-400 to-amber-600",
+    devices: [
+      d("Realme GT 7 Pro", 120, 240, 6.78, "2780×1264", "excellent"),
+      d("Realme GT 6", 120, 240, 6.78, "2780×1264", "excellent"),
+      d("Realme GT 5 Pro", 120, 240, 6.78, "2780×1264", "excellent"),
+      d("Realme 13 Pro+", 120, 240, 6.7, "2412×1080", "good"),
+      d("Realme 12 Pro+", 120, 240, 6.7, "2412×1080", "good"),
+    ],
+  },
+  {
+    id: "huawei", name: "Huawei", icon: "🌸", accent: "from-rose-400 to-pink-600",
+    devices: [
+      d("Huawei P60 Pro", 120, 240, 6.67, "2700×1220", "good"),
+      d("Huawei Mate 50 Pro", 120, 240, 6.74, "2616×1212", "good"),
+      d("Huawei P50 Pro", 120, 240, 6.6, "2700×1228", "good"),
+      d("Huawei Nova 11 Pro", 120, 240, 6.78, "2652×1200", "average"),
+    ],
+  },
+  {
+    id: "honor", name: "Honor", icon: "✨", accent: "from-sky-400 to-blue-600",
+    devices: [
+      d("Honor Magic 7 Pro", 120, 240, 6.78, "2800×1280", "excellent"),
+      d("Honor Magic 6 Pro", 120, 240, 6.78, "2800×1280", "excellent"),
+      d("Honor 200 Pro", 120, 240, 6.78, "2700×1224", "good"),
+    ],
+  },
+  {
+    id: "oppo", name: "OPPO", icon: "🟢", accent: "from-green-400 to-emerald-600",
     devices: [
       d("OPPO Find X8 Pro", 120, 240, 6.78, "2780×1264", "excellent"),
       d("OPPO Find X7 Ultra", 120, 240, 6.82, "3168×1440", "excellent"),
       d("OPPO Reno 12 Pro", 120, 240, 6.7, "2412×1080", "good"),
-      d("OPPO Reno 12", 120, 240, 6.7, "2412×1080", "good"),
     ],
   },
   {
-    id: "realme",
-    name: "Realme",
-    icon: "🌟",
-    accent: "from-yellow-400 to-amber-600",
+    id: "vivo", name: "Vivo", icon: "🔵", accent: "from-indigo-400 to-blue-600",
     devices: [
-      d("Realme GT 7 Pro", 120, 480, 6.78, "2780×1264", "excellent"),
-      d("Realme GT 6", 120, 240, 6.78, "2780×1264", "good"),
-      d("Realme GT Neo 6", 120, 240, 6.78, "2780×1264", "good"),
+      d("Vivo X200 Pro", 120, 240, 6.78, "2800×1280", "excellent"),
+      d("Vivo X100 Pro", 120, 240, 6.78, "3200×1440", "excellent"),
+      d("Vivo V30 Pro", 120, 240, 6.78, "2800×1264", "good"),
     ],
   },
   {
-    id: "huawei",
-    name: "Huawei",
-    icon: "🛰️",
-    accent: "from-rose-400 to-red-600",
+    id: "google", name: "Google", icon: "🔷", accent: "from-cyan-400 to-teal-600",
     devices: [
-      d("Huawei Mate 60 Pro", 120, 240, 6.82, "2720×1260", "good"),
-      d("Huawei P60 Pro", 120, 240, 6.67, "2700×1220", "good"),
-      d("Huawei Mate X5", 120, 240, 7.85, "2496×2224", "good"),
+      d("Pixel 9 Pro XL", 120, 240, 6.8, "2992×1344", "excellent"),
+      d("Pixel 9 Pro", 120, 240, 6.3, "2856×1280", "excellent"),
+      d("Pixel 8 Pro", 120, 240, 6.7, "2992×1344", "excellent"),
+      d("Pixel 8", 120, 240, 6.2, "2400×1080", "excellent"),
+      d("Pixel 7 Pro", 120, 240, 6.7, "3120×1440", "good"),
     ],
   },
   {
-    id: "gaming",
-    name: "Gaming",
-    icon: "🕹️",
-    accent: "from-fuchsia-500 to-purple-700",
+    id: "other", name: "Other", icon: "📲", accent: "from-gray-400 to-gray-600",
     devices: [
-      d("RedMagic 10 Pro", 144, 960, 6.85, "2688×1216", "excellent"),
-      d("RedMagic 9 Pro", 120, 960, 6.8, "2480×1116", "excellent"),
-      d("RedMagic 8 Pro", 120, 960, 6.8, "2480×1116", "excellent"),
-      d("Lenovo Legion Y700", 144, 240, 8.8, "2560×1600", "excellent"),
-      d("Lenovo Legion Phone 2 Pro", 144, 720, 6.92, "2460×1080", "excellent"),
+      d("Generic High-End (120Hz)", 120, 240, 6.5, "2400×1080", "good"),
+      d("Generic Mid-Range (90Hz)", 90, 180, 6.5, "2400×1080", "average"),
+      d("Generic Budget (60Hz)", 60, 120, 6.5, "2400×1080", "average"),
+      d("Low-End Device (30-60Hz)", 60, 60, 6.0, "1600×720", "average"),
     ],
   },
 ];
 
-export type WeaponCategory = {
-  id: string;
-  name: string;
-  icon: string;
-  weapons: { name: string; recoil: number; range: number; type: string }[];
-};
+export type Weapon = { name: string; recoil: number; range: number; type: string };
+export type WeaponCategory = { id: string; name: string; icon: string; weapons: Weapon[] };
 
 export const WEAPONS: WeaponCategory[] = [
   {
-    id: "ar",
-    name: "بنادق AR",
-    icon: "🔫",
+    id: "ar", name: "Assault Rifles", icon: "🔫",
     weapons: [
-      { name: "M416", recoil: 72, range: 65, type: "AR" },
-      { name: "AKM", recoil: 85, range: 68, type: "AR" },
-      { name: "M762", recoil: 88, range: 70, type: "AR" },
-      { name: "SCAR-L", recoil: 62, range: 60, type: "AR" },
-      { name: "G36C", recoil: 65, range: 62, type: "AR" },
-      { name: "AUG", recoil: 60, range: 64, type: "AR" },
-      { name: "QBZ", recoil: 64, range: 60, type: "AR" },
-      { name: "M16A4", recoil: 55, range: 75, type: "AR" },
-      { name: "FAMAS", recoil: 68, range: 58, type: "AR" },
-      { name: "ACE32", recoil: 78, range: 66, type: "AR" },
-      { name: "Groza", recoil: 82, range: 62, type: "AR" },
-      { name: "Honey Badger", recoil: 70, range: 58, type: "AR" },
-      { name: "Mk47 Mutant", recoil: 58, range: 72, type: "AR" },
-      { name: "K2", recoil: 66, range: 62, type: "AR" },
+      { name: "M416", recoil: 52, range: 72, type: "ar" },
+      { name: "AKM", recoil: 78, range: 68, type: "ar" },
+      { name: "SCAR-L", recoil: 48, range: 70, type: "ar" },
+      { name: "M762", recoil: 72, range: 65, type: "ar" },
+      { name: "AUG", recoil: 45, range: 75, type: "ar" },
+      { name: "M16A4", recoil: 58, range: 80, type: "ar" },
+      { name: "G36C", recoil: 50, range: 65, type: "ar" },
+      { name: "QBZ", recoil: 46, range: 72, type: "ar" },
+      { name: "ACE32", recoil: 54, range: 70, type: "ar" },
+      { name: "FAMAS", recoil: 55, range: 68, type: "ar" },
+      { name: "Groza", recoil: 68, range: 62, type: "ar" },
+      { name: "Mk47 Mutant", recoil: 70, range: 74, type: "ar" },
     ],
   },
   {
-    id: "smg",
-    name: "SMG",
-    icon: "💥",
+    id: "smg", name: "SMGs", icon: "⚡",
     weapons: [
-      { name: "UZI", recoil: 55, range: 30, type: "SMG" },
-      { name: "UMP45", recoil: 45, range: 40, type: "SMG" },
-      { name: "Vector", recoil: 58, range: 32, type: "SMG" },
-      { name: "MP5K", recoil: 48, range: 36, type: "SMG" },
-      { name: "Tommy Gun", recoil: 52, range: 35, type: "SMG" },
-      { name: "P90", recoil: 40, range: 38, type: "SMG" },
-      { name: "JS9", recoil: 42, range: 35, type: "SMG" },
-      { name: "PP-19 Bizon", recoil: 44, range: 34, type: "SMG" },
-      { name: "MP9", recoil: 50, range: 28, type: "SMG" },
+      { name: "UMP45", recoil: 32, range: 45, type: "smg" },
+      { name: "Vector", recoil: 28, range: 38, type: "smg" },
+      { name: "Tommy Gun", recoil: 40, range: 40, type: "smg" },
+      { name: "MP5K", recoil: 30, range: 42, type: "smg" },
+      { name: "PP-19 Bizon", recoil: 26, range: 36, type: "smg" },
+      { name: "P90", recoil: 34, range: 44, type: "smg" },
+      { name: "UMP9", recoil: 33, range: 44, type: "smg" },
     ],
   },
   {
-    id: "sniper",
-    name: "Sniper",
-    icon: "🎯",
+    id: "dmr", name: "DMRs", icon: "🎯",
     weapons: [
-      { name: "AWM", recoil: 95, range: 100, type: "Sniper" },
-      { name: "M24", recoil: 82, range: 92, type: "Sniper" },
-      { name: "Kar98k", recoil: 78, range: 88, type: "Sniper" },
-      { name: "Win94", recoil: 70, range: 70, type: "Sniper" },
-      { name: "Mosin-Nagant", recoil: 78, range: 88, type: "Sniper" },
-      { name: "Lynx AMR", recoil: 98, range: 100, type: "Sniper" },
-      { name: "M1 Garand", recoil: 72, range: 85, type: "Sniper" },
+      { name: "Mini14", recoil: 38, range: 82, type: "dmr" },
+      { name: "SKS", recoil: 48, range: 78, type: "dmr" },
+      { name: "SLR", recoil: 62, range: 85, type: "dmr" },
+      { name: "Mk14", recoil: 72, range: 88, type: "dmr" },
+      { name: "DMR", recoil: 58, range: 80, type: "dmr" },
+      { name: "VSS", recoil: 22, range: 50, type: "dmr" },
+      { name: "QBU", recoil: 42, range: 86, type: "dmr" },
     ],
   },
   {
-    id: "dmr",
-    name: "DMR",
-    icon: "🔭",
+    id: "sniper", name: "Snipers", icon: "🎯",
     weapons: [
-      { name: "Mini14", recoil: 50, range: 82, type: "DMR" },
-      { name: "SKS", recoil: 60, range: 80, type: "DMR" },
-      { name: "SLR", recoil: 72, range: 85, type: "DMR" },
-      { name: "Mk14", recoil: 78, range: 88, type: "DMR" },
-      { name: "QBU", recoil: 55, range: 82, type: "DMR" },
-      { name: "VSS", recoil: 40, range: 60, type: "DMR" },
-      { name: "Mk12", recoil: 52, range: 84, type: "DMR" },
-      { name: "Dragunov", recoil: 65, range: 86, type: "DMR" },
+      { name: "AWM", recoil: 92, range: 100, type: "sniper" },
+      { name: "Kar98k", recoil: 80, range: 90, type: "sniper" },
+      { name: "M24", recoil: 78, range: 92, type: "sniper" },
+      { name: "Win94", recoil: 55, range: 45, type: "sniper" },
+      { name: "Lynx AMR", recoil: 95, range: 98, type: "sniper" },
     ],
   },
   {
-    id: "lmg",
-    name: "LMG",
-    icon: "💣",
+    id: "lmg", name: "LMGs", icon: "💥",
     weapons: [
-      { name: "M249", recoil: 68, range: 55, type: "LMG" },
-      { name: "DP-28", recoil: 62, range: 58, type: "LMG" },
-      { name: "MG3", recoil: 75, range: 60, type: "LMG" },
+      { name: "M249", recoil: 68, range: 75, type: "lmg" },
+      { name: "DP-28", recoil: 72, range: 70, type: "lmg" },
     ],
   },
   {
-    id: "shotgun",
-    name: "Shotgun",
-    icon: "🧨",
+    id: "shotgun", name: "Shotguns", icon: "🔥",
     weapons: [
-      { name: "S12K", recoil: 80, range: 20, type: "Shotgun" },
-      { name: "S1897", recoil: 85, range: 18, type: "Shotgun" },
-      { name: "S686", recoil: 88, range: 15, type: "Shotgun" },
-      { name: "DBS", recoil: 90, range: 22, type: "Shotgun" },
-      { name: "M1014", recoil: 82, range: 20, type: "Shotgun" },
-      { name: "NS2000", recoil: 86, range: 17, type: "Shotgun" },
-      { name: "O12", recoil: 84, range: 19, type: "Shotgun" },
+      { name: "S12K", recoil: 65, range: 20, type: "shotgun" },
+      { name: "S1897", recoil: 85, range: 15, type: "shotgun" },
+      { name: "S686", recoil: 90, range: 18, type: "shotgun" },
+      { name: "DBS", recoil: 78, range: 22, type: "shotgun" },
+    ],
+  },
+  {
+    id: "pistol", name: "Pistols", icon: "🔫",
+    weapons: [
+      { name: "P92", recoil: 25, range: 30, type: "pistol" },
+      { name: "P1911", recoil: 22, range: 28, type: "pistol" },
+      { name: "R1895", recoil: 40, range: 25, type: "pistol" },
+      { name: "Desert Eagle", recoil: 55, range: 35, type: "pistol" },
+      { name: "P18C", recoil: 32, range: 32, type: "pistol" },
+      { name: "Scorpion", recoil: 28, range: 30, type: "pistol" },
     ],
   },
 ];
 
-// PUBG Mobile Official Servers
-export const SERVERS = [
-  { id: "jordan", name: "Jordan", flag: "🇯🇴", ping: 35 },
-  { id: "middle-east", name: "Middle East", flag: "🇦🇪", ping: 48 },
-  { id: "europe", name: "Europe", flag: "🇪🇺", ping: 118 },
-  { id: "asia", name: "Asia", flag: "🌏", ping: 145 },
-  { id: "north-america", name: "North America", flag: "🇺🇸", ping: 185 },
-  { id: "south-america", name: "South America", flag: "🇧🇷", ping: 210 },
-  { id: "krjp", name: "KRJP", flag: "🇰🇷", ping: 245 },
-];
+export type FingerCount = 2 | 3 | 4 | 5 | 6;
+export const FINGERS: FingerCount[] = [2, 3, 4, 5, 6];
 
-export const STYLES = [
-  { id: "headshot", name: "هيدشوت", icon: "🎯" },
-  { id: "spray", name: "سبراي", icon: "🔫" },
-  { id: "competitive", name: "تنافسي", icon: "🏆" },
-  { id: "close", name: "قريب المدى", icon: "⚡" },
-  { id: "reflex", name: "ردود فعل", icon: "💨" },
-  { id: "conqueror", name: "كونكر", icon: "👑" },
-];
-
-// ════════════════════════════════════════════════════════════
-// 4 Professional Esports Profiles
-// ════════════════════════════════════════════════════════════
-export type ProProfileId = "aggressive" | "balanced" | "competitive" | "headshot_pro" | "sniper_elite" | "spray_master" | "clutch_king" | "tdm_destroyer";
-
-export interface ProProfile {
+export type ProProfileId = "aggressive" | "balanced" | "competitive" | "headshot_pro" | "sniper_elite" | "spray_master";
+export type ProProfile = {
   id: ProProfileId;
   name: string;
-  nameAr: string;
-  icon: string;
+  emoji: string;
   description: string;
   descriptionAr: string;
-  color: string;
-  tier: "S" | "S+" | "A";
-  // Multipliers applied ON TOP of weapon profile
-  cqcMul: number;
-  scopeNearMul: number;
-  scopeFarMul: number;
-  gyroMul: number;
-  gyroFarMul: number;
-  // Advanced attributes
-  recoilControl: number;   // 1-10
-  tracking: number;        // 1-10
-  flicking: number;        // 1-10
-  longRange: number;       // 1-10
-  cqcPower: number;        // 1-10
+  recoilControl: number;
+  tracking: number;
+  flicking: number;
+  longRange: number;
+  cqcPower: number;
   strengths: string[];
   strengthsAr: string[];
   weaknesses: string[];
   weaknessesAr: string[];
   bestFor: string[];
   bestForAr: string[];
-}
+  cqcMul: number;
+  scopeNearMul: number;
+  scopeFarMul: number;
+  gyroMul: number;
+  gyroFarMul: number;
+};
 
 export const PRO_PROFILES: ProProfile[] = [
   {
     id: "aggressive",
-    name: "Aggressive Entry Fragger",
-    nameAr: "هجومي عدواني",
-    icon: "⚡",
-    description: "Maximum speed for CQC dominance. Higher TPP/FPP and Red Dot for instant 180° reactions.",
-    descriptionAr: "أقصى سرعة للسيطرة على القتال القريب. ردة فعل 180° فورية.",
-    color: "from-red-500 to-orange-500",
-    tier: "S",
-    cqcMul: 1.08, scopeNearMul: 1.05, scopeFarMul: 0.98, gyroMul: 1.06, gyroFarMul: 0.97,
-    recoilControl: 8, tracking: 9, flicking: 10, longRange: 7, cqcPower: 10,
-    strengths: ["Fast 180° turns", "Quick Red Dot tracking", "Dominant in buildings"],
-    strengthsAr: ["لفة 180° سريعة", "تتبع Red Dot سريع", "سيطرة في المباني"],
-    weaknesses: ["Less stable at 6x/8x", "Needs recoil skill"],
-    weaknessesAr: ["أقل ثباتاً على 6x/8x", "يحتاج مهارة ارتداد"],
-    bestFor: ["Rush", "Entry fragger", "TDM", "Hot drops"],
-    bestForAr: ["راش", "أول من يدخل", "TDM", "هوت دروب"],
+    name: "Aggressive Rusher",
+    emoji: "⚡",
+    description: "Fast entry, close-quarters combat, aggressive rotations.",
+    descriptionAr: "دخول سريع، قتال قريب، هجمات عدوانية.",
+    recoilControl: 88, tracking: 92, flicking: 95, longRange: 62, cqcPower: 98,
+    strengths: ["CQC", "Fast entry", "Building fights"],
+    strengthsAr: ["قتال قريب", "دخول سريع", "معارك المباني"],
+    weaknesses: ["Long-range", "Sniper duels"],
+    weaknessesAr: ["مدى بعيد", "مبارزات قنّاصين"],
+    bestFor: ["SMG", "AR", "TDM", "Rush"],
+    bestForAr: ["SMG", "AR", "TDM", "هجوم"],
+    cqcMul: 1.08, scopeNearMul: 1.04, scopeFarMul: 0.96, gyroMul: 1.04, gyroFarMul: 0.95,
   },
   {
     id: "balanced",
     name: "Balanced All-Rounder",
-    nameAr: "متوازن شامل",
-    icon: "⚖️",
-    description: "Perfect balance between speed and stability. Works for all ranges.",
-    descriptionAr: "توازن مثالي بين السرعة والثبات لكل المسافات.",
-    color: "from-emerald-500 to-teal-500",
-    tier: "A",
+    emoji: "⚖️",
+    description: "Stable setup for ranked and consistent muscle memory.",
+    descriptionAr: "إعداد مستقر للترتيب والذاكرة العضلية الثابتة.",
+    recoilControl: 85, tracking: 86, flicking: 82, longRange: 80, cqcPower: 84,
+    strengths: ["Versatile", "Stable", "All ranges"],
+    strengthsAr: ["متعدد", "مستقر", "كل المدى"],
+    weaknesses: ["None"],
+    weaknessesAr: ["لا شيء"],
+    bestFor: ["AR", "DMR", "Ranked", "Classic"],
+    bestForAr: ["AR", "DMR", "ترتيب", "كلاسيكي"],
     cqcMul: 1.0, scopeNearMul: 1.0, scopeFarMul: 1.0, gyroMul: 1.0, gyroFarMul: 1.0,
-    recoilControl: 9, tracking: 9, flicking: 9, longRange: 9, cqcPower: 9,
-    strengths: ["Consistent at all ranges", "Easy muscle memory", "Good for learning"],
-    strengthsAr: ["ثابت على كل المسافات", "سهل لذاكرة العضلات", "جيد للتعلّم"],
-    weaknesses: ["Not specialized", "May feel slow for aggressive"],
-    weaknessesAr: ["غير متخصص", "قد يشعر بالبطء للعدوانيين"],
-    bestFor: ["All-round", "Squad support", "Ranked", "Beginners"],
-    bestForAr: ["شامل", "دعم الفريق", "رانكد", "مبتدئين"],
   },
   {
     id: "competitive",
-    name: "Professional Competitive",
-    nameAr: "تنافسي احترافي",
-    icon: "🏆",
-    description: "Tournament-grade stability. Maximum precision for scrims and competitive play.",
-    descriptionAr: "ثبات بطولات. أقصى دقة للسكريم واللعب التنافسي.",
-    color: "from-amber-500 to-yellow-500",
-    tier: "S+",
-    cqcMul: 0.97, scopeNearMul: 0.96, scopeFarMul: 0.93, gyroMul: 0.98, gyroFarMul: 0.94,
-    recoilControl: 10, tracking: 10, flicking: 8, longRange: 10, cqcPower: 8,
-    strengths: ["Maximum long-range stability", "Tournament precision", "Best recoil control"],
-    strengthsAr: ["أقصى ثبات بعيد المدى", "دقة بطولات", "أفضل تحكم بالارتداد"],
-    weaknesses: ["Slower CQC", "Needs positioning skill"],
-    weaknessesAr: ["ردة فعل أبطأ بالقريب", "يحتاج مهارة تموضع"],
-    bestFor: ["Scrims", "Tournaments", "IGL/Support", "Conqueror"],
-    bestForAr: ["سكريم", "بطولات", "قائد الفريق", "كونكر"],
+    name: "Tournament Pro",
+    emoji: "🏆",
+    description: "Tournament-grade stability with strict recoil discipline.",
+    descriptionAr: "ثبات بمستوى البطولات مع انضباط صارم للارتداد.",
+    recoilControl: 96, tracking: 94, flicking: 80, longRange: 88, cqcPower: 82,
+    strengths: ["Max stability", "Recoil control", "Long-range"],
+    strengthsAr: ["أقصى ثبات", "تحكم ارتداد", "مدى بعيد"],
+    weaknesses: ["Slow entry"],
+    weaknessesAr: ["دخول بطيء"],
+    bestFor: ["AR", "DMR", "Snipers", "Conqueror"],
+    bestForAr: ["AR", "DMR", "قناصة", "فاتح"],
+    cqcMul: 0.98, scopeNearMul: 0.98, scopeFarMul: 1.05, gyroMul: 1.02, gyroFarMul: 1.06,
   },
   {
     id: "headshot_pro",
-    name: "Headshot Precision",
-    nameAr: "دقة الهيدشوت",
-    icon: "🎯",
-    description: "Precision-first. Lower sensitivity for head-level tracking. Higher gyro for micro-adjustments.",
-    descriptionAr: "الدقة أولاً. حساسية أقل لتتبع الرأس. جايرو أعلى للتعديلات الدقيقة.",
-    color: "from-purple-500 to-pink-500",
-    tier: "S",
-    cqcMul: 0.95, scopeNearMul: 0.94, scopeFarMul: 0.92, gyroMul: 1.04, gyroFarMul: 1.02,
-    recoilControl: 10, tracking: 10, flicking: 8, longRange: 10, cqcPower: 7,
-    strengths: ["Best headshot accuracy", "Smooth head tracking", "High gyro precision"],
-    strengthsAr: ["أفضل دقة هيدشوت", "تتبع رأس سلس", "دقة جايرو عالية"],
-    weaknesses: ["Slowest CQC speed", "Requires patience"],
-    weaknessesAr: ["أبطأ سرعة بالقريب", "يحتاج صبر"],
-    bestFor: ["Sniper main", "DMR", "Headshot hunter", "Patient player"],
-    bestForAr: ["سنايبر", "DMR", "صياد هيدشوت", "لاعب صبور"],
+    name: "Headshot Specialist",
+    emoji: "🎯",
+    description: "Built for head-level tracking and micro-corrections.",
+    descriptionAr: "مبني لتتبع مستوى الرأس والتصحيحات الدقيقة.",
+    recoilControl: 82, tracking: 98, flicking: 92, longRange: 86, cqcPower: 78,
+    strengths: ["Precision", "Tracking", "Headshots"],
+    strengthsAr: ["دقة", "تتبع", "رأس"],
+    weaknesses: ["Spray control"],
+    weaknessesAr: ["تحكم رش"],
+    bestFor: ["Sniper", "DMR", "Headshot", "Precision"],
+    bestForAr: ["قناص", "DMR", "رأس", "دقة"],
+    cqcMul: 0.96, scopeNearMul: 0.96, scopeFarMul: 1.04, gyroMul: 1.05, gyroFarMul: 1.07,
   },
   {
     id: "sniper_elite",
     name: "Sniper Elite",
-    nameAr: "نخبة القناصين",
-    icon: "🔭",
-    description: "Bolt-action specialist. Ultra-stable 6x/8x. Smooth scope transitions for one-shot kills.",
-    descriptionAr: "متخصص بولت أكشن. ثبات مطلق على 6x/8x. انتقالات سكوب سلسة لقتلة بطلقة.",
-    color: "from-indigo-500 to-blue-600",
-    tier: "S",
-    cqcMul: 0.92, scopeNearMul: 0.93, scopeFarMul: 0.88, gyroMul: 1.06, gyroFarMul: 1.05,
-    recoilControl: 9, tracking: 10, flicking: 7, longRange: 10, cqcPower: 7,
-    strengths: ["Ultra-stable 6x/8x", "Perfect bolt-action aim", "Deadly at 300m+"],
-    strengthsAr: ["ثبات مطلق 6x/8x", "تصويب بولت أكشن مثالي", "قاتل على 300م+"],
-    weaknesses: ["Very slow CQC", "Terrible in buildings", "Needs team cover"],
-    weaknessesAr: ["بطيء جداً بالقريب", "سيء في المباني", "يحتاج غطاء الفريق"],
-    bestFor: ["Bolt-action sniper", "AWM/M24/Kar98k main", "Long-range support"],
-    bestForAr: ["سنايبر بولت", "AWM/M24/Kar98k", "دعم بعيد المدى"],
+    emoji: "🏹",
+    description: "Ultra-stable sniper setup for disciplined long-range play.",
+    descriptionAr: "إعداد قناص فائق الثبات للعب بعيد المدى المنضبط.",
+    recoilControl: 90, tracking: 84, flicking: 70, longRange: 98, cqcPower: 55,
+    strengths: ["Long-range", "One-shot", "Breath control"],
+    strengthsAr: ["مدى بعيد", "طلقة واحدة", "تحكم تنفس"],
+    weaknesses: ["CQC", "Close fights"],
+    weaknessesAr: ["قتال قريب"],
+    bestFor: ["AWM", "M24", "Kar98k", "6x/8x"],
+    bestForAr: ["AWM", "M24", "Kar98k", "6x/8x"],
+    cqcMul: 0.88, scopeNearMul: 0.85, scopeFarMul: 1.12, gyroMul: 1.08, gyroFarMul: 1.15,
   },
   {
     id: "spray_master",
     name: "Spray Master",
-    nameAr: "سيّد السبراي",
-    icon: "🔫",
-    description: "Full-auto recoil control specialist. Maximum spray stability on 3x/4x. Gyro tuned for vertical pull-down.",
-    descriptionAr: "متخصص بالتحكم في الارتداد التلقائي. أقصى ثبات سبراي على 3x/4x. جايرو مضبوط للسحب.",
-    color: "from-orange-500 to-red-600",
-    tier: "S+",
-    cqcMul: 1.03, scopeNearMul: 1.02, scopeFarMul: 0.95, gyroMul: 1.08, gyroFarMul: 1.06,
-    recoilControl: 10, tracking: 10, flicking: 9, longRange: 9, cqcPower: 9,
-    strengths: ["Best spray control", "Stable 3x/4x sprays", "High gyro recoil compensation"],
-    strengthsAr: ["أفضل تحكم بالسبراي", "ثبات 3x/4x عالي", "تعويض ارتداد جايرو قوي"],
-    weaknesses: ["Not fastest CQC", "Needs spray practice daily"],
-    weaknessesAr: ["ليس الأسرع بالقريب", "يحتاج تمرين سبراي يومي"],
-    bestFor: ["M762/AKM spray", "3x/4x spray", "Mid-range dominance", "Recoil control pros"],
-    bestForAr: ["سبراي M762/AKM", "سبراي 3x/4x", "سيطرة المتوسط", "محترفي الارتداد"],
-  },
-  {
-    id: "clutch_king",
-    name: "Clutch King",
-    nameAr: "ملك الكلاتش",
-    icon: "👑",
-    description: "Survival specialist. Balanced but slightly faster CQC for 1vX situations. Smart gyro for multi-enemy tracking.",
-    descriptionAr: "متخصص بالبقاء. متوازن مع CQC أسرع لمواجهات 1 ضد الجميع. جايرو ذكي لتتبع عدة أعداء.",
-    color: "from-yellow-500 to-amber-600",
-    tier: "S+",
-    cqcMul: 1.05, scopeNearMul: 1.02, scopeFarMul: 0.96, gyroMul: 1.04, gyroFarMul: 0.98,
-    recoilControl: 10, tracking: 10, flicking: 10, longRange: 9, cqcPower: 10,
-    strengths: ["Best for 1vX clutches", "Fast target switching", "Adaptable to any situation"],
-    strengthsAr: ["الأفضل لكلاتش 1vX", "تبديل أهداف سريع", "قابل للتكيف مع أي موقف"],
-    weaknesses: ["Not best at any extreme", "Needs game sense"],
-    weaknessesAr: ["ليس الأفضل في أي طرف", "يحتاج حس لعب"],
-    bestFor: ["Solo player", "1vX clutches", "Solo vs Squad", "Last alive"],
-    bestForAr: ["لاعب سولو", "كلاتش 1vX", "سولو ضد سكواد", "آخر واقف"],
-  },
-  {
-    id: "tdm_destroyer",
-    name: "TDM Destroyer",
-    nameAr: "مدمّر TDM",
-    icon: "💀",
-    description: "Pure hip-fire and Red Dot speed. Highest TPP/FPP for instant reactions. Built for Arena and TDM domination.",
-    descriptionAr: "سرعة هيب فاير و Red Dot مطلقة. أعلى TPP/FPP لردة فعل فورية. مصمم لسيطرة TDM والأرينا.",
-    color: "from-rose-500 to-red-700",
-    tier: "S",
-    cqcMul: 1.12, scopeNearMul: 1.08, scopeFarMul: 0.96, gyroMul: 1.08, gyroFarMul: 0.95,
-    recoilControl: 8, tracking: 10, flicking: 10, longRange: 7, cqcPower: 10,
-    strengths: ["Fastest reactions in game", "Hip-fire beast", "Red Dot god-speed"],
-    strengthsAr: ["أسرع ردة فعل في اللعبة", "وحش الهيب فاير", "سرعة Red Dot خارقة"],
-    weaknesses: ["Unstable at long range", "Hard to spray 4x+", "Not for ranked"],
-    weaknessesAr: ["غير ثابت من بعيد", "صعب السبراي 4x+", "ليس للرانكد"],
-    bestFor: ["TDM", "Arena", "Warehouse 1v1", "Close-range only"],
-    bestForAr: ["TDM", "أرينا", "وير هاوس 1v1", "قريب فقط"],
+    emoji: "💧",
+    description: "Laser-beam spray patterns for mid-range dominance.",
+    descriptionAr: "أنماط رش ليزرية لهيمنة المدى المتوسط.",
+    recoilControl: 95, tracking: 90, flicking: 78, longRange: 70, cqcPower: 90,
+    strengths: ["Spray", "Mid-range", "Beams"],
+    strengthsAr: ["رش", "مدى متوسط", "شعاع"],
+    weaknesses: ["Long range"],
+    weaknessesAr: ["مدى بعيد"],
+    bestFor: ["M416", "SCAR-L", "AKM", "TDM"],
+    bestForAr: ["M416", "SCAR-L", "AKM", "TDM"],
+    cqcMul: 1.04, scopeNearMul: 1.06, scopeFarMul: 0.94, gyroMul: 1.03, gyroFarMul: 0.97,
   },
 ];
 
-export const FINGERS = [2, 3, 4, 5, 6] as const;
+export type Server = {
+  id: string;
+  name: string;
+  region: string;
+  flag: string;
+  ping: number; // baseline ms
+};
+
+export const SERVERS: Server[] = [
+  { id: "jordan", name: "Jordan", region: "Middle East", flag: "🇯🇴", ping: 12 },
+  { id: "ksa", name: "Saudi Arabia", region: "Middle East", flag: "🇸🇦", ping: 22 },
+  { id: "turkey", name: "Turkey", region: "Middle East", flag: "🇹🇷", ping: 35 },
+  { id: "egypt", name: "Egypt", region: "Africa", flag: "🇪🇬", ping: 42 },
+  { id: "india", name: "India", region: "Asia", flag: "🇮🇳", ping: 110 },
+  { id: "singapore", name: "Singapore", region: "Asia", flag: "🇸🇬", ping: 180 },
+  { id: "europe", name: "Europe", region: "EU", flag: "🇪🇺", ping: 145 },
+];
+
+export type DNSServer = {
+  id: string;
+  name: string;
+  provider: string;
+  ip: string;
+  baseline: number; // ms
+};
+
+export const DNS_SERVERS: DNSServer[] = [
+  { id: "jo-orange-1", name: "Orange Jordan DNS", provider: "Orange", ip: "37.205.149.1", baseline: 8 },
+  { id: "jo-orange-2", name: "Orange Secondary", provider: "Orange", ip: "37.205.167.2", baseline: 10 },
+  { id: "jo-zain-1", name: "Zain Jordan DNS", provider: "Zain", ip: "94.142.37.179", baseline: 11 },
+  { id: "jo-zain-2", name: "Zain Secondary", provider: "Zain", ip: "94.142.53.34", baseline: 12 },
+  { id: "jo-umnea-1", name: "Umniah DNS", provider: "Umniah", ip: "92.253.13.100", baseline: 9 },
+  { id: "jo-umnea-2", name: "Umniah Backup", provider: "Umniah", ip: "92.253.19.31", baseline: 11 },
+  { id: "jo-umnea-3", name: "Umniah Fast", provider: "Umniah", ip: "92.253.101.217", baseline: 10 },
+  { id: "jo-damamax-1", name: "Damamax DNS", provider: "Damamax", ip: "213.186.174.202", baseline: 13 },
+  { id: "jo-xsservers", name: "XServers Amman", provider: "XServers", ip: "46.185.162.241", baseline: 14 },
+];

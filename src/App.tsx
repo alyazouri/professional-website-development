@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { BRANDS, WEAPONS, FINGERS, PRO_PROFILES, type ProProfileId } from "./data";
-import { computeSensitivity, SensitivityTable, FactorsPanel, CopyButton, type Sens, type SensParams } from "./sensitivity";
+import { computeSensitivity, SensitivityTable, FactorsPanel, CopyButton, type Sens, type SensParams, type GyroMode } from "./sensitivity";
 import { PingMonitor } from "./PingMonitor";
+import { DnsMonitor } from "./DnsMonitor";
+import { AICoach } from "./AICoach";
 import { PacSection } from "./PacSection";
 import { HudPreview } from "./HudPreview";
 import { Hero } from "./Hero";
 import { StatusBar } from "./StatusBar";
 import { Particles } from "./Particles";
-import { RevealSection, RatingSection, ShareButton, AIPredictions, NightModeToggle } from "./Features";
+import { RevealSection, RatingSection, ShareButton, AIPredictions } from "./Features";
 import { TouchTest } from "./TouchTest";
 import { QuickSearch } from "./QuickSearch";
 import { PWABanner } from "./PWABanner";
@@ -16,7 +18,7 @@ import { DPICalculator } from "./DPICalculator";
 import { MusicPlayer } from "./MusicPlayer";
 import { useLang } from "./LanguageContext";
 import { t } from "./i18n";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { SectionHeader } from "./sensitivity";
 
 type SavedProfile = {
   id: string;
@@ -31,9 +33,7 @@ function loadProfiles(): SavedProfile[] {
   try {
     const raw = localStorage.getItem(LS_KEY);
     return raw ? (JSON.parse(raw) as SavedProfile[]) : [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 function saveProfiles(list: SavedProfile[]) {
@@ -41,252 +41,157 @@ function saveProfiles(list: SavedProfile[]) {
 }
 
 const PRO_RECOMMENDATIONS: Record<ProProfileId, {
-  gyro: "off" | "scope" | "always";
-  minFingers: 2 | 3 | 4 | 5 | 6;
-  weaponFocus: string[];
-  weaponFocusAr: string[];
-  preferredWeaponCat: string;
-  preferredWeaponName: string;
-  note: string;
-  noteAr: string;
-  warmup: string[];
-  warmupAr: string[];
-  featureStack: string[];
-  featureStackAr: string[];
+  gyro: "off" | "scope" | "always"; minFingers: 2 | 3 | 4 | 5 | 6;
+  weaponFocus: string[]; weaponFocusAr: string[];
+  preferredWeaponCat: string; preferredWeaponName: string;
+  note: string; noteAr: string;
+  warmup: string[]; warmupAr: string[];
+  featureStack: string[]; featureStackAr: string[];
 }> = {
   aggressive: {
     gyro: "always", minFingers: 4,
-    weaponFocus: ["SMG", "AR", "TDM", "Rush"], weaponFocusAr: ["SMG", "AR", "TDM", "راش"],
+    weaponFocus: ["SMG", "AR", "TDM", "Rush"], weaponFocusAr: ["SMG", "AR", "TDM", "هجوم"],
     preferredWeaponCat: "smg", preferredWeaponName: "UMP45",
-    note: "High speed and fast entry for building fights.", noteAr: "سرعة عالية ودخول سريع لمعارك المباني.",
+    note: "High speed and fast entry for building fights.",
+    noteAr: "سرعة عالية ودخول سريع لمعارك المباني.",
     warmup: ["5 min TDM rush", "Red Dot tracking", "90° flicks"],
-    warmupAr: ["5 دقائق TDM راش", "تتبع Red Dot", "فليكات 90°"],
+    warmupAr: ["5 دقائق TDM هجوم", "تتبع Red Dot", "فليك 90°"],
     featureStack: ["Touch Test", "Share", "Recorder"],
-    featureStackAr: ["اختبار اللمس", "المشاركة", "التسجيل"],
+    featureStackAr: ["اختبار اللمس", "مشاركة", "مسجّل"],
   },
   balanced: {
     gyro: "scope", minFingers: 4,
-    weaponFocus: ["AR", "DMR", "Ranked", "Classic"], weaponFocusAr: ["AR", "DMR", "رانكد", "كلاسيك"],
+    weaponFocus: ["AR", "DMR", "Ranked", "Classic"], weaponFocusAr: ["AR", "DMR", "ترتيب", "كلاسيكي"],
     preferredWeaponCat: "ar", preferredWeaponName: "M416",
-    note: "Daily safe setup for ranked and stable muscle memory.", noteAr: "إعداد يومي آمن للرانكد وذاكرة عضلية ثابتة.",
+    note: "Daily safe setup for ranked and stable muscle memory.",
+    noteAr: "إعداد آمن يومي للترتيب والذاكرة العضلية الثابتة.",
     warmup: ["3 min burst control", "2 min 2x tracking", "1 classic match"],
-    warmupAr: ["3 دقائق تحكم بيرست", "دقيقتين تتبع 2x", "مباراة كلاسيك"],
+    warmupAr: ["3 دقائق تحكم رش", "دقيقتان تتبع 2x", "مباراة كلاسيكية واحدة"],
     featureStack: ["DPI Calculator", "Touch Test", "Saved Profiles"],
-    featureStackAr: ["حاسبة DPI", "اختبار اللمس", "الملفات المحفوظة"],
+    featureStackAr: ["حاسبة DPI", "اختبار اللمس", "البروفايلات المحفوظة"],
   },
   competitive: {
     gyro: "always", minFingers: 5,
-    weaponFocus: ["AR", "DMR", "Scrims", "Conqueror"], weaponFocusAr: ["AR", "DMR", "سكريم", "كونكر"],
+    weaponFocus: ["AR", "DMR", "Snipers", "Conqueror"], weaponFocusAr: ["AR", "DMR", "قناصة", "فاتح"],
     preferredWeaponCat: "ar", preferredWeaponName: "AUG",
-    note: "Tournament-grade stability with strict recoil discipline.", noteAr: "ثبات بطولات مع انضباط كامل في الارتداد.",
+    note: "Tournament-grade stability with strict recoil discipline.",
+    noteAr: "ثبات بمستوى البطولات مع انضباط صارم للارتداد.",
     warmup: ["10 min 4x spray", "3x tracking", "peek + drag drills"],
-    warmupAr: ["10 دقائق سبراي 4x", "تتبع 3x", "تمارين بيك + دراغ"],
+    warmupAr: ["10 دقائق رش 4x", "تتبع 3x", "تمارين peek + drag"],
     featureStack: ["DPI Calculator", "Quick Search", "Saved Profiles"],
-    featureStackAr: ["حاسبة DPI", "البحث السريع", "الملفات المحفوظة"],
+    featureStackAr: ["حاسبة DPI", "بحث سريع", "البروفايلات المحفوظة"],
   },
   headshot_pro: {
     gyro: "always", minFingers: 5,
-    weaponFocus: ["Sniper", "DMR", "Headshot", "Precision"], weaponFocusAr: ["Sniper", "DMR", "هيدشوت", "دقة"],
+    weaponFocus: ["Sniper", "DMR", "Headshot", "Precision"], weaponFocusAr: ["قناص", "DMR", "رأس", "دقة"],
     preferredWeaponCat: "dmr", preferredWeaponName: "Mini14",
-    note: "Built for head-level tracking and micro-corrections.", noteAr: "مصمم لتتبع مستوى الرأس والتعديلات الدقيقة.",
+    note: "Built for head-level tracking and micro-corrections.",
+    noteAr: "مبني لتتبع مستوى الرأس والتصحيحات الدقيقة.",
     warmup: ["Single-tap drills", "6x head tracking", "micro gyro practice"],
-    warmupAr: ["تمارين تاب واحد", "تتبع الرأس 6x", "تمرين جايرو دقيق"],
+    warmupAr: ["تمارين نقرة واحدة", "تتبع رأس 6x", "تدريب جايرو دقيق"],
     featureStack: ["Touch Test", "DPI Calculator", "Screen Recorder"],
-    featureStackAr: ["اختبار اللمس", "حاسبة DPI", "تسجيل الشاشة"],
+    featureStackAr: ["اختبار اللمس", "حاسبة DPI", "مسجّل الشاشة"],
   },
   sniper_elite: {
     gyro: "always", minFingers: 4,
     weaponFocus: ["AWM", "M24", "Kar98k", "6x/8x"], weaponFocusAr: ["AWM", "M24", "Kar98k", "6x/8x"],
     preferredWeaponCat: "sniper", preferredWeaponName: "AWM",
-    note: "Ultra-stable sniper setup for disciplined long-range play.", noteAr: "إعداد قنص ثابت جداً للعب البعيد المنضبط.",
+    note: "Ultra-stable sniper setup for disciplined long-range play.",
+    noteAr: "إعداد قناص فائق الثبات للعب بعيد المدى المنضبط.",
     warmup: ["6x hold drill", "8x breath control", "one-shot rhythm"],
-    warmupAr: ["تمرين تثبيت 6x", "تحكم نفس 8x", "إيقاع طلقة واحدة"],
+    warmupAr: ["تمرين تثبيت 6x", "تحكم تنفس 8x", "إيقاع طلقة واحدة"],
     featureStack: ["DPI Calculator", "Recorder", "Share"],
-    featureStackAr: ["حاسبة DPI", "التسجيل", "المشاركة"],
+    featureStackAr: ["حاسبة DPI", "مسجّل", "مشاركة"],
   },
   spray_master: {
-    gyro: "always", minFingers: 5,
-    weaponFocus: ["AKM", "M762", "4x Spray", "Recoil"], weaponFocusAr: ["AKM", "M762", "4x Spray", "ارتداد"],
-    preferredWeaponCat: "ar", preferredWeaponName: "M762",
-    note: "Maximum spray control with high vertical pull-down compensation.", noteAr: "أقصى تحكم بالسبراي مع تعويض عالي للسحب العمودي.",
-    warmup: ["4x spray 150m", "vertical pull", "moving target spray"],
-    warmupAr: ["سبراي 4x على 150م", "سحب عمودي", "سبراي على هدف متحرك"],
-    featureStack: ["Touch Test", "DPI Calculator", "Recorder"],
-    featureStackAr: ["اختبار اللمس", "حاسبة DPI", "التسجيل"],
-  },
-  clutch_king: {
     gyro: "always", minFingers: 4,
-    weaponFocus: ["1vX", "Solo", "Reflex", "Adapt"], weaponFocusAr: ["1vX", "سولو", "ردة فعل", "مرونة"],
+    weaponFocus: ["M416", "SCAR-L", "AKM", "TDM"], weaponFocusAr: ["M416", "SCAR-L", "AKM", "TDM"],
     preferredWeaponCat: "ar", preferredWeaponName: "M416",
-    note: "Built for clutch pressure, target switching and adaptability.", noteAr: "مصمم لضغط الكلاتش وتبديل الأهداف والمرونة.",
-    warmup: ["target switch drills", "1v3 arena", "panic control"],
-    warmupAr: ["تمارين تبديل أهداف", "1v3 أرينا", "تحكم تحت الضغط"],
-    featureStack: ["Touch Test", "Quick Search", "Saved Profiles"],
-    featureStackAr: ["اختبار اللمس", "البحث السريع", "الملفات المحفوظة"],
-  },
-  tdm_destroyer: {
-    gyro: "always", minFingers: 4,
-    weaponFocus: ["TDM", "Arena", "Warehouse", "Hip-fire"], weaponFocusAr: ["TDM", "أرينا", "ويرهاوس", "هيب فاير"],
-    preferredWeaponCat: "smg", preferredWeaponName: "P90",
-    note: "Fastest reaction setup for TDM and arena domination.", noteAr: "أسرع إعداد ردة فعل للسيطرة على TDM والأرينا.",
-    warmup: ["warehouse 1v1", "hip-fire flicks", "spawn rush drill"],
-    warmupAr: ["ويرهاوس 1v1", "فليكات هيب فاير", "تمرين سباون راش"],
-    featureStack: ["Touch Test", "Recorder", "Share"],
-    featureStackAr: ["اختبار اللمس", "التسجيل", "المشاركة"],
+    note: "Laser-beam spray patterns for mid-range dominance.",
+    noteAr: "أنماط رش ليزرية لهيمنة المدى المتوسط.",
+    warmup: ["10 min 3x spray", "recoil reset", "move+fire sync"],
+    warmupAr: ["10 دقائق رش 3x", "إعادة ضبط ارتداد", "مزامنة حركة+نار"],
+    featureStack: ["Touch Test", "DPI Calculator", "Recorder"],
+    featureStackAr: ["اختبار اللمس", "حاسبة DPI", "مسجّل"],
   },
 };
 
-export default function App() {
+export function App() {
   const { lang } = useLang();
   const [brandId, setBrandId] = useState(BRANDS[0].id);
-  const [deviceIdx, setDeviceIdx] = useState(0);
-  const [fingers, setFingers] = useState(4);
-  const [weaponCatId, setWeaponCatId] = useState(WEAPONS[0].id);
-  const [weaponIdx, setWeaponIdx] = useState(0);
-  const [gyroMode, setGyroMode] = useState<"off" | "scope" | "always">("always");
+  const [deviceId, setDeviceId] = useState(BRANDS[0].devices[0].name);
+  const [weaponId, setWeaponId] = useState(WEAPONS[0].id);
+  const [weaponName, setWeaponName] = useState(WEAPONS[0].weapons[0].name);
+  const [fingers, setFingers] = useState<2 | 3 | 4 | 5 | 6>(4);
+  const [styleId, setStyleId] = useState("balanced");
+  const [gyroMode, setGyroMode] = useState<GyroMode>("scope");
   const [proProfile, setProProfile] = useState<ProProfileId>("balanced");
-  const [isSuperPower, setIsSuperPower] = useState(false);
-  // styleId is derived from proProfile automatically
-  const styleId = ({
-    aggressive: "close", balanced: "competitive", competitive: "conqueror", headshot_pro: "headshot",
-    sniper_elite: "headshot", spray_master: "spray", clutch_king: "reflex", tdm_destroyer: "close",
-  } as Record<string, string>)[proProfile] ?? "competitive";
+  const [profiles, setProfiles] = useState<SavedProfile[]>(() => loadProfiles());
+  const [ping, setPing] = useState<number | null>(null);
 
-  const [heroPing, setHeroPing] = useState<number | null>(null);
+  const brand = BRANDS.find((b) => b.id === brandId) ?? BRANDS[0];
+  const device = brand.devices.find((d) => d.name === deviceId) ?? brand.devices[0];
+  const weaponCat = WEAPONS.find((c) => c.id === weaponId) ?? WEAPONS[0];
+  const weapon = weaponCat.weapons.find((w) => w.name === weaponName) ?? weaponCat.weapons[0];
 
-  const [profiles, setProfiles] = useState<SavedProfile[]>([]);
-
+  // Auto-switch device when brand changes
   useEffect(() => {
-    setProfiles(loadProfiles());
-    // Simulate initial ping for hero
-    const t = setTimeout(() => setHeroPing(35 + Math.round(Math.random() * 8)), 800);
-    return () => clearTimeout(t);
+    const b = BRANDS.find((br) => br.id === brandId);
+    if (b && b.devices[0]) setDeviceId(b.devices[0].name);
+  }, [brandId]);
+
+  // Auto-switch weapon when category changes
+  useEffect(() => {
+    const c = WEAPONS.find((cat) => cat.id === weaponId);
+    if (c && c.weapons[0]) setWeaponName(c.weapons[0].name);
+  }, [weaponId]);
+
+  // Simulate ping
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const base = 15;
+      const variance = (Math.random() - 0.5) * 10;
+      setPing(Math.max(8, Math.round(base + variance)));
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  const brand = BRANDS.find((b) => b.id === brandId)!;
-  const device = brand.devices[deviceIdx] ?? brand.devices[0];
-  const weaponCat = WEAPONS.find((c) => c.id === weaponCatId)!;
-  const weapon = weaponCat.weapons[weaponIdx] ?? weaponCat.weapons[0];
-
-  // Reset indices when changing brand / category
-  useEffect(() => setDeviceIdx(0), [brandId]);
-  useEffect(() => setWeaponIdx(0), [weaponCatId]);
-
-  const params: SensParams = useMemo(
-    () => ({
-      deviceId: `${brandId}-${deviceIdx}`,
-      device,
-      brandId,
-      fingers,
-      styleId,
-      gyroMode,
-      weaponId: `${weaponCatId}-${weaponIdx}`,
-      weaponName: weapon.name,
-      weaponRecoil: weapon.recoil,
-      weaponRange: weapon.range,
-      weaponType: weapon.type,
-      proProfile,
-      isSuperPower,
-    }),
-    [brandId, deviceIdx, device, fingers, styleId, gyroMode, proProfile, isSuperPower, weaponCatId, weaponIdx, weapon]
-  );
+  const params: SensParams = useMemo(() => ({
+    deviceId: `${brandId}|${deviceId}`,
+    device, brandId, fingers, styleId, gyroMode,
+    weaponId, weaponName, weaponRecoil: weapon.recoil,
+    weaponRange: weapon.range, weaponType: weapon.type,
+    proProfile,
+  }), [brandId, deviceId, device, fingers, styleId, gyroMode, weaponId, weaponName, weapon, proProfile]);
 
   const sens: Sens = useMemo(() => computeSensitivity(params), [params]);
 
-  const saveCurrent = () => {
-    const name = `${device.name} · ${weapon.name} · ${fingers}f`;
-    const list: SavedProfile[] = [
-      { id: `${Date.now()}`, name, params, savedAt: Date.now() },
-      ...profiles,
-    ].slice(0, 5);
-    setProfiles(list);
-    saveProfiles(list);
-  };
-
-  const removeProfile = (id: string) => {
-    const list = profiles.filter((p) => p.id !== id);
-    setProfiles(list);
-    saveProfiles(list);
+  const saveProfile = () => {
+    const name = `${device.name} · ${weapon.name} · ${fingers}F`;
+    const p: SavedProfile = { id: `${Date.now()}`, name, params, savedAt: Date.now() };
+    const next = [p, ...profiles].slice(0, 5);
+    setProfiles(next);
+    saveProfiles(next);
   };
 
   const loadProfile = (p: SavedProfile) => {
     setBrandId(p.params.brandId);
-    setFingers(p.params.fingers);
-    // styleId is auto-derived from proProfile
+    setDeviceId(p.params.device.name);
+    setFingers(p.params.fingers as 2 | 3 | 4 | 5 | 6);
+    setStyleId(p.params.styleId);
     setGyroMode(p.params.gyroMode);
-    setWeaponCatId(p.params.weaponId.split("-")[0]);
-    setTimeout(() => {
-      const brand = BRANDS.find((b) => b.id === p.params.brandId);
-      if (brand) {
-        const idx = brand.devices.findIndex((dv) => dv.name === p.params.device.name);
-        setDeviceIdx(idx >= 0 ? idx : 0);
-      }
-      const cat = WEAPONS.find((c) => c.id === p.params.weaponId.split("-")[0]);
-      if (cat) {
-        const wIdx = cat.weapons.findIndex((w) => w.name === p.params.weaponName);
-        setWeaponIdx(wIdx >= 0 ? wIdx : 0);
-      }
-    }, 0);
+    setWeaponId(p.params.weaponId);
+    setWeaponName(p.params.weaponName);
+    if (p.params.proProfile) setProProfile(p.params.proProfile as ProProfileId);
   };
 
   return (
-    <div className="relative min-h-screen bg-[#05070c] text-white">
+    <div className="relative min-h-screen">
       <Particles />
-      {/* Fixed Navbar */}
-      <nav className="fixed top-0 right-0 left-0 z-50 border-b border-white/5 bg-[#05070c]/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
-          <a href="#" className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/30">
-              <span className="font-display text-lg font-black text-white">A</span>
-              <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#05070c]" />
-            </div>
-            <div>
-              <div className="font-display text-sm font-black tracking-widest text-white">ALYAZOURI</div>
-              <div className="text-[10px] text-white/50">Jordan Optimizer · 2026</div>
-            </div>
-          </a>
-          <div className="hidden items-center gap-1 text-sm md:flex">
-            <a href="#generator" className="rounded-lg px-3 py-1.5 text-white/70 hover:bg-white/5 hover:text-orange-300">
-              {t("nav_generator", lang)}
-            </a>
-            <a href="#ping" className="rounded-lg px-3 py-1.5 text-white/70 hover:bg-white/5 hover:text-orange-300">
-              {t("nav_ping", lang)}
-            </a>
-            <a href="#weapons" className="rounded-lg px-3 py-1.5 text-white/70 hover:bg-white/5 hover:text-orange-300">
-              {t("nav_weapons", lang)}
-            </a>
-            <a href="#pac" className="rounded-lg px-3 py-1.5 text-white/70 hover:bg-white/5 hover:text-orange-300">
-              {t("nav_pac", lang)}
-            </a>
-            <a href="#about" className="rounded-lg px-3 py-1.5 text-white/70 hover:bg-white/5 hover:text-orange-300">
-              {t("nav_about", lang)}
-            </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <MusicPlayer />
-            <QuickSearch
-              onSelectDevice={(bId, dIdx) => { setBrandId(bId); setTimeout(() => setDeviceIdx(dIdx), 0); }}
-              onSelectWeapon={(cId, wIdx) => { setWeaponCatId(cId); setTimeout(() => setWeaponIdx(wIdx), 0); }}
-            />
-            <NightModeToggle />
-            <LanguageSwitcher />
-            <a
-              href="#generator"
-              className="btn-primary hidden rounded-lg px-4 py-2 text-xs sm:inline-block"
-            >
-              {t("nav_cta", lang)}
-            </a>
-          </div>
-        </div>
-      </nav>
+      <StatusBar ping={ping} />
+      <Hero ping={ping} />
 
-      <StatusBar />
-      <div className="pt-8">
-        <Hero ping={heroPing} />
-      </div>
-
-      {/* Main content */}
-      <main className="mx-auto max-w-7xl px-5 pb-24">
+      <div className="mx-auto max-w-7xl px-5 pb-24 relative z-10">
         {/* Generator */}
         <section id="generator" className="mt-12 scroll-mt-20">
           <SectionHeader
@@ -298,56 +203,42 @@ export default function App() {
           <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
             {/* Controls */}
             <div className="space-y-5">
+              {/* Quick Search */}
+              <QuickSearch
+                onSelect={(r) => {
+                  if (r.type === "device") {
+                    const [bid, dname] = r.id.split("|");
+                    setBrandId(bid); setDeviceId(dname);
+                  } else {
+                    const cat = WEAPONS.find((c) => c.weapons.some((w) => w.name === r.id));
+                    if (cat) { setWeaponId(cat.id); setWeaponName(r.id); }
+                  }
+                }}
+              />
+
               {/* Device */}
               <div className="card rounded-2xl p-5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="text-lg">📱</span>
                   <h3 className="font-display text-sm font-bold tracking-widest text-white">{t("device_select", lang)}</h3>
                 </div>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {BRANDS.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => setBrandId(b.id)}
-                      className={`chip rounded-full px-3 py-1.5 text-xs font-semibold ${brandId === b.id ? "active" : ""}`}
-                    >
-                      <span className="ml-1">{b.icon}</span>
-                      {b.name}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid max-h-40 grid-cols-1 gap-1.5 overflow-y-auto sm:grid-cols-2">
-                  {brand.devices.map((d, i) => (
-                    <button
-                      key={d.name}
-                      onClick={() => setDeviceIdx(i)}
-                      className={`chip flex flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-right text-xs ${deviceIdx === i ? "active" : ""}`}
-                    >
-                      <span className="font-semibold">{d.name}</span>
-                      <span className="text-[10px] text-white/40">
-                        {d.fps} FPS · {d.touchRate}Hz · {d.screenSize}"
-                      </span>
-                    </button>
-                  ))}
+                <div className="space-y-2">
+                  <select value={brandId} onChange={(e) => setBrandId(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white transition-colors focus:border-orange-400/50 focus:outline-none">
+                    {BRANDS.map((b) => (<option key={b.id} value={b.id}>{b.icon} {b.name}</option>))}
+                  </select>
+                  <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white transition-colors focus:border-orange-400/50 focus:outline-none">
+                    {brand.devices.map((d) => (<option key={d.name} value={d.name}>{d.name}</option>))}
+                  </select>
                 </div>
                 <div className="mt-3 rounded-lg border border-white/5 bg-black/30 p-3 text-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                  <span className="text-white/50">{t("device_selected", lang)}</span>
-                  <b className="text-orange-300">{device.name}</b>
-                </div>
-                    <div className="flex gap-2 text-[10px] text-white/60">
-                      <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.fps} FPS</span>
-                      <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.touchRate} Hz</span>
-                      <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.screenSize}"</span>
-                      <span className={`rounded px-2 py-0.5 font-display ${
-                        device.gyroQuality === "excellent" ? "bg-emerald-500/20 text-emerald-300" :
-                        device.gyroQuality === "good" ? "bg-amber-500/20 text-amber-300" :
-                        "bg-red-500/20 text-red-300"
-                      }`}>
-                        {device.gyroQuality === "excellent" ? t("device_gyro_excellent", lang) : device.gyroQuality === "good" ? t("device_gyro_good", lang) : t("device_gyro_average", lang)}
-                      </span>
-                    </div>
+                  <span className="text-white/50">{t("device_selected", lang)}</span> <b className="text-orange-300">{device.name}</b>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.fps} FPS</span>
+                    <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.touchRate} Hz</span>
+                    <span className="rounded bg-black/40 px-2 py-0.5 font-display">{device.screenSize}"</span>
+                    <span className={`rounded px-2 py-0.5 font-display ${device.gyroQuality === "excellent" ? "bg-emerald-500 text-emerald-300" : device.gyroQuality === "good" ? "bg-amber-500 text-amber-300" : "bg-red-500 text-red-300"}`}>
+                      {device.gyroQuality === "excellent" ? t("device_gyro_excellent", lang) : device.gyroQuality === "good" ? t("device_gyro_good", lang) : t("device_gyro_average", lang)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -369,15 +260,17 @@ export default function App() {
                     <button
                       key={m.id}
                       onClick={() => setGyroMode(m.id)}
-                      className={`chip rounded-xl px-3 py-3 text-center ${gyroMode === m.id ? "active" : ""}`}
+                      className={`rounded-xl border p-3 text-center transition-all ${
+                        gyroMode === m.id ? "border-orange-400/50 bg-orange-500/10" : "border-white/5 bg-black/20 hover:border-white/20"
+                      }`}
                     >
-                      <div className="text-xl">{m.icon}</div>
-                      <div className="mt-1 text-xs font-bold">{m.label}</div>
-                      <div className="text-[10px] text-white/50">{m.desc}</div>
+                      <div className="text-2xl">{m.icon}</div>
+                      <div className="mt-1 text-xs font-bold text-white">{m.label}</div>
+                      <div className="mt-0.5 text-[9px] text-white/50">{m.desc}</div>
                     </button>
                   ))}
                 </div>
-                <div className="mt-3 rounded-lg border border-white/5 bg-black/30 p-3 text-[11px] leading-relaxed text-white/60">
+                <div className="mt-3 rounded-lg bg-black/20 px-3 py-2 text-xs text-white/60">
                   {gyroMode === "off" && t("gyro_msg_off", lang)}
                   {gyroMode === "scope" && t("gyro_msg_scope", lang)}
                   {gyroMode === "always" && t("gyro_msg_always", lang)}
@@ -390,32 +283,19 @@ export default function App() {
                   <h3 className="font-display text-sm font-bold tracking-widest text-white">
                     🏆 {lang === "ar" ? "البروفايل الاحترافي" : "Pro Profile"}
                   </h3>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setIsSuperPower(!isSuperPower)}
-                      className={`rounded-full px-3 py-1 text-[9px] font-black transition-all ${
-                        isSuperPower
-                          ? "bg-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]"
-                          : "bg-white/10 text-white/50"
-                      }`}
-                    >
-                      ⚡ SUPER POWER
-                    </button>
-                    <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2.5 py-0.5 text-[9px] font-bold text-white">PRO</span>
-                  </div>
+                  <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2.5 py-0.5 text-[9px] font-bold text-white">PRO</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {PRO_PROFILES.map((pr) => (
                     <button
                       key={pr.id}
                       onClick={() => setProProfile(pr.id)}
-                      className={`chip relative rounded-xl px-3 py-3 text-center transition-all ${proProfile === pr.id ? "active" : ""}`}
+                      className={`rounded-xl border p-2.5 text-center transition-all ${
+                        proProfile === pr.id ? "border-purple-400/50 bg-purple-500/10" : "border-white/5 bg-black/20 hover:border-white/20"
+                      }`}
                     >
-                      <div className={`absolute top-1 right-1 rounded px-1 py-0.5 font-display text-[7px] font-black ${pr.tier === "S+" ? "bg-gradient-to-r from-amber-400 to-yellow-300 text-black" : pr.tier === "S" ? "bg-orange-500/30 text-orange-300" : "bg-white/10 text-white/50"}`}>
-                        {pr.tier}
-                      </div>
-                      <div className="text-2xl">{pr.icon}</div>
-                      <div className="mt-1 text-[10px] font-bold leading-tight">{lang === "ar" ? pr.nameAr : pr.name}</div>
+                      <div className="text-2xl">{pr.emoji}</div>
+                      <div className="mt-1 text-[10px] font-bold text-white">{pr.name}</div>
                     </button>
                   ))}
                 </div>
@@ -433,41 +313,39 @@ export default function App() {
                   return (
                     <div className="mt-3 space-y-3">
                       <div className="rounded-xl border border-white/5 bg-black/30 p-3">
-                        <div className="mb-1 text-[10px] text-white/50">{lang === "ar" ? pr.descriptionAr : pr.description}</div>
+                        <p className="text-xs text-white/70">{lang === "ar" ? pr.descriptionAr : pr.description}</p>
                       </div>
-                      {/* Stats bars */}
                       <div className="space-y-2">
                         {stats.map((s) => (
                           <div key={s.k} className="flex items-center gap-2">
                             <span className="w-20 shrink-0 text-[10px] text-white/60">{s.k}</span>
-                            <div className="flex-1 h-1.5 rounded-full bg-white/5">
-                              <div className={`h-full rounded-full ${s.c}`} style={{ width: `${s.v * 10}%` }} />
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
+                              <div className={`h-full ${s.c}`} style={{ width: `${s.v}%` }} />
                             </div>
                             <span className="font-display text-[10px] font-bold text-white/80 w-5 text-right">{s.v}</span>
                           </div>
                         ))}
                       </div>
-                      {/* Strengths + Weaknesses + Best for */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                         <div className="rounded-lg border border-emerald-400/10 bg-emerald-500/5 p-2.5">
-                          <div className="mb-1.5 text-[9px] font-bold text-emerald-300">✅ {lang === "ar" ? "القوة" : "Strengths"}</div>
+                          <div className="text-[10px] font-bold text-emerald-300">✅ {lang === "ar" ? "القوة" : "Strengths"}</div>
                           {(lang === "ar" ? pr.strengthsAr : pr.strengths).map((s, i) => (
-                            <div key={i} className="flex items-start gap-1.5 text-[9px] text-white/60 leading-relaxed">
+                            <div key={i} className="mt-1 flex items-start gap-1 text-[10px] text-white/70">
                               <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-emerald-400" />{s}
                             </div>
                           ))}
                         </div>
                         <div className="rounded-lg border border-amber-400/10 bg-amber-500/5 p-2.5">
-                          <div className="mb-1.5 text-[9px] font-bold text-amber-300">⚠️ {lang === "ar" ? "الضعف" : "Weak"}</div>
+                          <div className="text-[10px] font-bold text-amber-300">⚠️ {lang === "ar" ? "الضعف" : "Weak"}</div>
                           {(lang === "ar" ? pr.weaknessesAr : pr.weaknesses).map((s, i) => (
-                            <div key={i} className="flex items-start gap-1.5 text-[9px] text-white/60 leading-relaxed">
+                            <div key={i} className="mt-1 flex items-start gap-1 text-[10px] text-white/70">
                               <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-amber-400" />{s}
                             </div>
                           ))}
                         </div>
                         <div className="rounded-lg border border-sky-400/10 bg-sky-500/5 p-2.5">
-                          <div className="mb-1.5 text-[9px] font-bold text-sky-300">🎯 {lang === "ar" ? "الأفضل لـ" : "Best for"}</div>
-                          <div className="flex flex-wrap gap-1">
+                          <div className="text-[10px] font-bold text-sky-300">🎯 {lang === "ar" ? "الأفضل لـ" : "Best for"}</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {(lang === "ar" ? pr.bestForAr : pr.bestFor).map((s, i) => (
                               <span key={i} className="rounded bg-sky-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-sky-300">{s}</span>
                             ))}
@@ -475,67 +353,36 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* PRO MAX Recommendations */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <div className="rounded-lg border border-purple-400/10 bg-purple-500/5 p-3">
-                          <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-purple-300">PRO MAX</div>
+                          <div className="text-[10px] font-bold text-purple-300">PRO MAX</div>
                           <div className="space-y-1.5 text-[10px] text-white/65">
-                            <div className="flex items-center justify-between gap-2">
-                              <span>{lang === "ar" ? "وضع الجايرو الموصى" : "Recommended Gyro"}</span>
-                              <span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.gyro}</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span>{lang === "ar" ? "أقل أصابع مناسب" : "Recommended Fingers"}</span>
-                              <span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.minFingers}F</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span>{lang === "ar" ? "السلاح المقترح" : "Suggested Weapon"}</span>
-                              <span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.preferredWeaponName}</span>
-                            </div>
-                            <div className="flex items-start justify-between gap-2">
-                              <span>{lang === "ar" ? "أنسب فئة أسلحة" : "Best Weapon Focus"}</span>
-                              <span className="text-right text-purple-300 font-semibold">{(lang === "ar" ? rec.weaponFocusAr : rec.weaponFocus).join(" · ")}</span>
-                            </div>
+                            <div className="flex justify-between"><span>{lang === "ar" ? "وضع الجايرو الموصى" : "Recommended Gyro"}</span><span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.gyro}</span></div>
+                            <div className="flex justify-between"><span>{lang === "ar" ? "أقل أصابع مناسب" : "Recommended Fingers"}</span><span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.minFingers}F</span></div>
+                            <div className="flex justify-between"><span>{lang === "ar" ? "السلاح المقترح" : "Suggested Weapon"}</span><span className="rounded bg-purple-500/10 px-2 py-0.5 font-bold text-purple-300">{rec.preferredWeaponName}</span></div>
+                            <div className="flex justify-between"><span>{lang === "ar" ? "أنسب فئة أسلحة" : "Best Weapon Focus"}</span><span className="text-right text-purple-300 font-semibold">{(lang === "ar" ? rec.weaponFocusAr : rec.weaponFocus).join(" · ")}</span></div>
                           </div>
                         </div>
                         <div className="rounded-lg border border-fuchsia-400/10 bg-fuchsia-500/5 p-3">
-                          <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-fuchsia-300">INSIGHT</div>
-                          <div className="text-[10px] leading-relaxed text-white/65">
-                            {lang === "ar" ? rec.noteAr : rec.note}
-                          </div>
-                          <button
-                            onClick={() => {
-                              setGyroMode(rec.gyro);
-                              setFingers((prev) => (prev < rec.minFingers ? rec.minFingers : prev));
-                              const cat = WEAPONS.find((w) => w.id === rec.preferredWeaponCat);
-                              if (cat) {
-                                setWeaponCatId(cat.id);
-                                const idx = cat.weapons.findIndex((w) => w.name === rec.preferredWeaponName);
-                                setTimeout(() => setWeaponIdx(idx >= 0 ? idx : 0), 0);
-                              }
-                            }}
-                            className="mt-3 w-full rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 px-3 py-2 text-[10px] font-bold text-white hover:opacity-90"
-                          >
-                            ✨ {lang === "ar" ? "تطبيق FULL PRO MAX" : "Apply FULL PRO MAX"}
-                          </button>
+                          <div className="text-[10px] font-bold text-fuchsia-300">INSIGHT</div>
+                          <p className="mt-1 text-[10px] text-white/65">{lang === "ar" ? rec.noteAr : rec.note}</p>
                         </div>
                       </div>
 
-                      {/* PRO MAX Tool Stack + Warmup */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <div className="rounded-lg border border-cyan-400/10 bg-cyan-500/5 p-3">
-                          <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-cyan-300">TOOL STACK</div>
-                          <div className="flex flex-wrap gap-1">
+                          <div className="text-[10px] font-bold text-cyan-300">TOOL STACK</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {(lang === "ar" ? rec.featureStackAr : rec.featureStack).map((s, i) => (
                               <span key={i} className="rounded bg-cyan-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-cyan-300">{s}</span>
                             ))}
                           </div>
                         </div>
                         <div className="rounded-lg border border-lime-400/10 bg-lime-500/5 p-3">
-                          <div className="mb-2 text-[9px] font-bold uppercase tracking-widest text-lime-300">WARM-UP</div>
+                          <div className="text-[10px] font-bold text-lime-300">WARM-UP</div>
                           <div className="space-y-1">
                             {(lang === "ar" ? rec.warmupAr : rec.warmup).map((s, i) => (
-                              <div key={i} className="flex items-start gap-1.5 text-[9px] text-white/65 leading-relaxed">
+                              <div key={i} className="mt-1 flex items-start gap-1 text-[10px] text-white/70">
                                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-lime-400" />{s}
                               </div>
                             ))}
@@ -551,64 +398,85 @@ export default function App() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="card rounded-2xl p-5">
                   <h3 className="mb-3 font-display text-sm font-bold tracking-widest text-white">{t("fingers_title", lang)}</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-5 gap-1.5">
                     {FINGERS.map((f) => (
                       <button
                         key={f}
                         onClick={() => setFingers(f)}
-                        className={`chip flex-1 rounded-lg px-3 py-2 text-sm font-bold ${fingers === f ? "active" : ""}`}
+                        className={`rounded-lg border py-2 text-sm font-bold transition-all ${
+                          fingers === f ? "border-orange-400 bg-orange-500/15 text-orange-300" : "border-white/5 bg-black/20 text-white/70 hover:border-white/20"
+                        }`}
                       >
-                        {f} {t("fingers_suffix", lang)}
+                        {f}F
                       </button>
                     ))}
                   </div>
                 </div>
-
+                <div className="card rounded-2xl p-5">
+                  <h3 className="mb-3 font-display text-sm font-bold tracking-widest text-white">{lang === "ar" ? "أسلوب اللعب" : "Play Style"}</h3>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: "balanced", label: lang === "ar" ? "متوازن" : "Balanced", icon: "⚖️" },
+                      { id: "aggressive", label: lang === "ar" ? "عدواني" : "Aggressive", icon: "⚡" },
+                      { id: "headshot", label: lang === "ar" ? "رأس" : "Headshot", icon: "🎯" },
+                      { id: "spray", label: lang === "ar" ? "رش" : "Spray", icon: "💧" },
+                      { id: "competitive", label: lang === "ar" ? "بطولة" : "Compete", icon: "🏆" },
+                      { id: "close", label: lang === "ar" ? "قريب" : "Close", icon: "🔥" },
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setStyleId(s.id)}
+                        className={`rounded-lg border py-2 text-[10px] font-bold transition-all ${
+                          styleId === s.id ? "border-orange-400 bg-orange-500/15 text-orange-300" : "border-white/5 bg-black/20 text-white/70 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="text-lg">{s.icon}</div>
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Weapon */}
               <div className="card rounded-2xl p-5">
                 <h3 className="mb-3 font-display text-sm font-bold tracking-widest text-white">{t("weapon_title", lang)}</h3>
-                <div className="mb-3 flex flex-wrap gap-2">
+                <div className="mb-2 flex flex-wrap gap-1.5">
                   {WEAPONS.map((c) => (
                     <button
                       key={c.id}
-                      onClick={() => setWeaponCatId(c.id)}
-                      className={`chip rounded-full px-3 py-1.5 text-xs font-semibold ${weaponCatId === c.id ? "active" : ""}`}
+                      onClick={() => setWeaponId(c.id)}
+                      className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                        weaponId === c.id ? "border-orange-400/50 bg-orange-500/15 text-orange-300" : "border-white/5 bg-black/20 text-white/70 hover:border-white/20"
+                      }`}
                     >
-                      <span className="ml-1">{c.icon}</span>
-                      {c.name}
+                      {c.icon} {c.name}
                     </button>
                   ))}
                 </div>
-                <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3">
-                  {weaponCat.weapons.map((w, i) => (
-                    <button
-                      key={w.name}
-                      onClick={() => setWeaponIdx(i)}
-                      className={`chip rounded-lg px-3 py-2 text-right text-xs font-semibold ${weaponIdx === i ? "active" : ""}`}
-                    >
-                      {w.name}
-                    </button>
-                  ))}
-                </div>
+                <select value={weaponName} onChange={(e) => setWeaponName(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white focus:border-orange-400/50 focus:outline-none">
+                  {weaponCat.weapons.map((w) => (<option key={w.name} value={w.name}>{w.name}</option>))}
+                </select>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-lg border border-white/5 bg-black/30 p-2.5">
-                    <div className="text-white/40">{t("weapon_recoil", lang)}</div>
-                    <div className="stat-bar mt-1.5 h-1.5"><span style={{ width: `${weapon.recoil}%` }} /></div>
+                    <div className="text-[10px] text-white/40">{t("weapon_recoil", lang)}</div>
+                    <div className="font-display text-lg font-bold text-red-300 tabular-nums">🔥 {weapon.recoil}</div>
                   </div>
                   <div className="rounded-lg border border-white/5 bg-black/30 p-2.5">
-                    <div className="text-white/40">{t("weapon_range", lang)}</div>
-                    <div className="stat-bar mt-1.5 h-1.5"><span style={{ width: `${weapon.range}%` }} /></div>
+                    <div className="text-[10px] text-white/40">{t("weapon_range", lang)}</div>
+                    <div className="font-display text-lg font-bold text-emerald-300 tabular-nums">🎯 {weapon.range}</div>
                   </div>
                 </div>
               </div>
 
-              <CopyButton sens={sens} lang={lang} />
-              <ShareButton sens={sens} deviceName={device.name} weaponName={weapon.name} />
-              <button onClick={saveCurrent} className="btn-ghost w-full rounded-xl px-5 py-3 text-sm">
-                {t("save_btn", lang)}
-              </button>
+              {/* Action buttons */}
+              <div className="space-y-2">
+                <CopyButton sens={sens} lang={lang} />
+                <ShareButton sens={sens} deviceName={device.name} weaponName={weapon.name} />
+                <button onClick={saveProfile} className="btn-ghost w-full rounded-xl px-5 py-3 text-sm">
+                  💾 {lang === "ar" ? "حفظ البروفايل" : "Save Profile"}
+                </button>
+              </div>
             </div>
 
             {/* Output */}
@@ -616,10 +484,10 @@ export default function App() {
               {/* AI Score */}
               <div className="card relative overflow-hidden rounded-2xl p-5">
                 <div className="absolute inset-0 bg-grid opacity-20" />
-                <div className="relative flex items-center justify-between">
+                <div className="relative flex items-center justify-between gap-4">
                   <div>
-                    <div className="font-display text-[11px] tracking-[0.3em] text-orange-400">{t("ai_score_label", lang)}</div>
-                    <div className="mt-1 text-xl font-bold text-white">{t("ai_score_title", lang)}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-white/50">{t("ai_score_label", lang)}</div>
+                    <div className="mt-1 text-lg font-bold text-white">{t("ai_score_title", lang)}</div>
                     <div className="mt-1 text-xs text-white/50">
                       {device.name} · {weapon.name} · {fingers} {t("ai_suffix", lang)}
                     </div>
@@ -627,12 +495,7 @@ export default function App() {
                   <div className="relative h-28 w-28">
                     <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
                       <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.08)" strokeWidth="8" fill="none" />
-                      <circle
-                        cx="50" cy="50" r="42"
-                        stroke="url(#grad)" strokeWidth="8" fill="none"
-                        strokeLinecap="round"
-                        strokeDasharray={`${(sens.aiScore / 100) * 264} 264`}
-                      />
+                      <circle cx="50" cy="50" r="42" stroke="url(#grad)" strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray={`${(sens.aiScore / 100) * 264} 264`} />
                       <defs>
                         <linearGradient id="grad" x1="0" x2="1">
                           <stop offset="0%" stopColor="#ff7a00" />
@@ -642,7 +505,7 @@ export default function App() {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <div className="font-display text-3xl font-black text-white tabular-nums">{sens.aiScore}</div>
-                      <div className="text-[9px] uppercase tracking-widest text-white/50">AI SCORE</div>
+                      <div className="text-[9px] uppercase tracking-widest text-orange-300">AI SCORE</div>
                     </div>
                   </div>
                 </div>
@@ -652,22 +515,23 @@ export default function App() {
               <FactorsPanel sens={sens} />
 
               {/* Sensitivity tables */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <SensitivityTable label={t("sens_camera", lang)} data={sens.cam} color="orange" />
-                <SensitivityTable label={t("sens_ads", lang)} data={sens.ads} color="orange" />
+              <div className="space-y-4">
+                {/* Camera + ADS side-by-side on desktop, stacked on mobile */}
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <SensitivityTable label={t("sens_camera", lang)} data={sens.cam} color="orange" />
+                  <SensitivityTable label={t("sens_ads", lang)} data={sens.ads} color="orange" />
+                </div>
                 {gyroMode === "off" ? (
-                  <div className="card flex flex-col items-center justify-center rounded-2xl p-8 text-center sm:col-span-2">
+                  <div className="card flex flex-col items-center justify-center rounded-2xl p-8 text-center">
                     <div className="text-4xl">⭕</div>
-                    <div className="mt-2 font-display text-sm font-bold text-white">{t("gyro_disabled_title", lang)}</div>
-                    <div className="mt-1 text-xs text-white/50">
-                      {t("gyro_disabled_msg", lang)}
-                    </div>
+                    <div className="mt-2 text-lg font-bold text-white">{t("gyro_disabled_title", lang)}</div>
+                    <div className="mt-1 text-sm text-white/60">{t("gyro_disabled_msg", lang)}</div>
                   </div>
                 ) : (
-                  <>
+                  <div className="grid gap-4 lg:grid-cols-2">
                     <SensitivityTable label={t("sens_gyro_cam", lang)} data={sens.gyroCam} color="sky" showTppFpp={gyroMode === "always"} />
                     <SensitivityTable label={t("sens_gyro_ads", lang)} data={sens.gyroAds} color="sky" showTppFpp={gyroMode === "always"} />
-                  </>
+                  </div>
                 )}
               </div>
 
@@ -680,7 +544,7 @@ export default function App() {
                     return (
                       <div key={k} className="rounded-xl border border-white/5 bg-black/30 p-3">
                         <div className="text-[10px] uppercase tracking-widest text-white/40">{t(labelKey as Parameters<typeof t>[0], lang)}</div>
-                        <div className="mt-1 font-display text-2xl font-black text-orange-300 tabular-nums">{v}%</div>
+                        <div className="mt-1 font-display text-lg font-bold text-white tabular-nums">{v}%</div>
                       </div>
                     );
                   })}
@@ -689,6 +553,9 @@ export default function App() {
 
               {/* AI Predictions */}
               <AIPredictions deviceName={device.name} fingers={fingers} styleId={styleId} weaponName={weapon.name} />
+
+              {/* AI Coach - Full Analysis */}
+              <AICoach sens={sens} params={params} />
 
               {/* Touch Speed Test */}
               <TouchTest />
@@ -701,7 +568,7 @@ export default function App() {
 
               {/* HUD + Stability Analysis */}
               <div className="grid gap-4 lg:grid-cols-2">
-                <HudPreview fingers={fingers} style={styleId} />
+                <HudPreview fingers={fingers} />
                 <div className="card rounded-2xl p-5">
                   <h4 className="mb-3 font-display text-sm font-bold tracking-widest text-white/90">
                     {t("stability_title", lang)}
@@ -714,17 +581,17 @@ export default function App() {
                       { label: t("stability_style", lang), value: (sens.factors.styleFactor * 100).toFixed(0), color: "from-sky-500 to-indigo-500" },
                     ].map((item) => (
                       <div key={item.label} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center justify-between">
                           <span className="text-white/70">{item.label}</span>
                           <span className="font-display font-bold text-white tabular-nums">{item.value}%</span>
                         </div>
-                        <div className="stat-bar h-2">
-                          <span className={`bg-gradient-to-r ${item.color}`} style={{ width: `${Math.min(100, parseFloat(item.value))}%` }} />
+                        <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                          <div className={`h-full bg-gradient-to-r ${item.color} stat-bar`} style={{ width: `${item.value}%` }} />
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 rounded-lg border border-orange-400/20 bg-orange-500/5 p-3 text-[11px] leading-relaxed text-orange-200/80">
+                  <div className="mt-4 rounded-lg bg-black/20 p-3 text-[10px] text-white/60">
                     {t("stability_equation", lang)}<br />
                     {t("stability_desc", lang)}
                   </div>
@@ -736,21 +603,23 @@ export default function App() {
 
         {/* Ping */}
         <section id="ping" className="mt-20 scroll-mt-20">
-          <SectionHeader
-            eyebrow={t("ping_eyebrow", lang)}
-            title={t("ping_title", lang)}
-            subtitle={t("ping_sub", lang)}
-          />
+          <SectionHeader eyebrow={t("ping_eyebrow", lang)} title={t("ping_title", lang)} subtitle={t("ping_sub", lang)} />
           <PingMonitor />
+        </section>
+
+        {/* DNS Jordan */}
+        <section id="dns" className="mt-20 scroll-mt-20">
+          <SectionHeader
+            eyebrow="DNS JORDAN · LIVE"
+            title={lang === "ar" ? "🛡️ أسرع DNS أردني" : "🛡️ Fastest Jordan DNS"}
+            subtitle={lang === "ar" ? "اختبار مباشر لـ 9 خوادم DNS محلية لأفضل بينغ ممكن" : "Live test of 9 local DNS servers for the lowest possible ping"}
+          />
+          <DnsMonitor />
         </section>
 
         {/* Weapons database */}
         <section id="weapons" className="mt-20 scroll-mt-20">
-          <SectionHeader
-            eyebrow={t("weapons_eyebrow", lang)}
-            title={t("weapons_title", lang)}
-            subtitle={t("weapons_sub", lang)}
-          />
+          <SectionHeader eyebrow={t("weapons_eyebrow", lang)} title={t("weapons_title", lang)} subtitle={t("weapons_sub", lang)} />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {WEAPONS.map((c) => (
               <div key={c.id} className="card rounded-2xl p-5">
@@ -765,15 +634,12 @@ export default function App() {
                 </div>
                 <div className="space-y-1.5">
                   {c.weapons.map((w) => (
-                    <div
-                      key={w.name}
-                      className="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 px-3 py-2 text-xs"
-                    >
+                    <div key={w.name} className="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 px-3 py-2 text-xs">
                       <span className="font-semibold text-white">{w.name}</span>
-                      <div className="flex items-center gap-3 text-white/50">
+                      <span className="flex gap-2 text-white/60">
                         <span>🔥 {w.recoil}</span>
                         <span>🎯 {w.range}</span>
-                      </div>
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -784,11 +650,7 @@ export default function App() {
 
         {/* Equations */}
         <section className="mt-20">
-          <SectionHeader
-            eyebrow={t("eq_eyebrow", lang)}
-            title={t("eq_title", lang)}
-            subtitle={t("eq_sub", lang)}
-          />
+          <SectionHeader eyebrow={t("eq_eyebrow", lang)} title={t("eq_title", lang)} subtitle={t("eq_sub", lang)} />
           <div className="grid gap-4 md:grid-cols-3">
             {[
               { k: "R_s", label: t("eq_rs", lang), eq: "(FPS × TSR × G_s) / (H_d × R_c)" },
@@ -796,12 +658,9 @@ export default function App() {
               { k: "H_d", label: t("eq_hd", lang), eq: "(T_r × FPS) / D_l" },
             ].map((e) => (
               <div key={e.k} className="card rounded-2xl p-5">
-                <div className="font-display text-2xl font-black text-orange-300">{e.k}</div>
-                <div className="mt-1 text-sm text-white/70">{e.label}</div>
-                <div
-                  dir="ltr"
-                  className="mt-3 rounded-lg border border-white/5 bg-black/40 p-3 text-center font-mono text-sm text-orange-100"
-                >
+                <div className="font-display text-xs text-orange-300">{e.k}</div>
+                <div className="mt-1 text-sm font-bold text-white">{e.label}</div>
+                <div className="mt-3 rounded-lg bg-black/40 p-3 font-mono text-xs text-emerald-300">
                   {e.eq}
                 </div>
               </div>
@@ -811,43 +670,26 @@ export default function App() {
 
         {/* Saved */}
         <section className="mt-20">
-          <SectionHeader
-            eyebrow={t("saved_eyebrow", lang)}
-            title={t("saved_title", lang)}
-            subtitle={t("saved_sub", lang)}
-          />
+          <SectionHeader eyebrow={t("saved_eyebrow", lang)} title={t("saved_title", lang)} subtitle={t("saved_sub", lang)} />
           <div className="card rounded-2xl p-5">
             {profiles.length === 0 ? (
               <div className="py-10 text-center text-white/50">
                 <div className="text-4xl">🗂️</div>
-                <p className="mt-3 text-sm">{t("saved_empty", lang)}</p>
+                <div className="mt-3 text-sm">{t("saved_empty", lang)}</div>
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {profiles.map((p) => (
-                  <div key={p.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-display text-sm font-bold text-white">{p.name}</div>
-                        <div className="mt-0.5 text-[11px] text-white/50">
-                          {new Date(p.savedAt).toLocaleString("ar-JO")}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeProfile(p.id)}
-                        className="text-white/40 hover:text-red-400"
-                        aria-label="delete"
-                      >
-                        ✕
-                      </button>
+                  <button
+                    key={p.id}
+                    onClick={() => loadProfile(p)}
+                    className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-right transition-all hover:border-orange-400/30 hover:bg-white/[0.04]"
+                  >
+                    <div className="font-bold text-white">{p.name}</div>
+                    <div className="mt-1 text-[10px] text-white/50">
+                      {new Date(p.savedAt).toLocaleString("ar-JO")}
                     </div>
-                    <button
-                      onClick={() => loadProfile(p)}
-                      className="mt-3 w-full rounded-lg bg-orange-500/10 px-3 py-2 text-xs font-bold text-orange-300 hover:bg-orange-500/20"
-                    >
-                      {t("saved_restore", lang)}
-                    </button>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -856,11 +698,7 @@ export default function App() {
 
         {/* PAC */}
         <section id="pac" className="mt-20 scroll-mt-20">
-          <SectionHeader
-            eyebrow={t("pac_eyebrow", lang)}
-            title={t("pac_title", lang)}
-            subtitle={t("pac_sub", lang)}
-          />
+          <SectionHeader eyebrow={t("pac_eyebrow", lang)} title={t("pac_title", lang)} subtitle={t("pac_sub", lang)} />
           <PacSection />
         </section>
 
@@ -870,61 +708,60 @@ export default function App() {
         </RevealSection>
 
         {/* About / Footer */}
-        <section id="about" className="mt-20 scroll-mt-20">
-          <div className="card rounded-3xl p-8">
-            <div className="grid gap-8 md:grid-cols-3">
-              <div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600">
-                    <span className="font-display text-xl font-black text-white">A</span>
-                  </div>
-                  <div>
-                    <div className="font-display text-lg font-black text-white">ALYAZOURI</div>
-                    <div className="text-[11px] text-white/50">Jordan Gaming Optimizer 2026</div>
-                  </div>
+        <div className="card mt-20 scroll-mt-20 rounded-3xl p-6 sm:p-8" id="about">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 shadow-[0_0_20px_rgba(255,122,0,0.4)]">
+                  <span className="font-display text-xl font-black text-white">A</span>
                 </div>
-                <p className="mt-4 text-sm text-white/60">
-                  {t("footer_about", lang)}
-                </p>
+                <div>
+                  <div className="font-display text-xl font-black text-white">ALYAZOURI</div>
+                  <div className="text-[10px] uppercase tracking-widest text-orange-300/70">Jordan Gaming Optimizer 2026</div>
+                </div>
               </div>
-              <div>
-                <h4 className="font-display text-sm font-bold tracking-widest text-orange-300">{t("footer_contact", lang)}</h4>
-                <ul className="mt-3 space-y-2 text-sm">
-                  <li><a href="https://tiktok.com/@saeedalyazouri0" target="_blank" rel="noreferrer" className="text-white/70 hover:text-orange-300">🎵 TikTok: @saeedalyazouri0</a></li>
-                  <li><a href="https://instagram.com/saeedjor11" target="_blank" rel="noreferrer" className="text-white/70 hover:text-orange-300">📸 Instagram: @saeedjor11</a></li>
-                  <li><span className="text-white/70">🎮 PUBG ID: </span><span className="font-display text-orange-300">5744469523</span></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-display text-sm font-bold tracking-widest text-orange-300">{t("footer_features", lang)}</h4>
-                <ul className="mt-3 space-y-2 text-sm text-white/70">
-                  <li>{t("footer_f1", lang)}</li>
-                  <li>{t("footer_f2", lang)}</li>
-                  <li>{t("footer_f3", lang)}</li>
-                  <li>{t("footer_f4", lang)}</li>
-                  <li>{t("footer_f5", lang)}</li>
-                </ul>
-              </div>
+              <p className="mt-4 text-sm text-white/60">
+                {t("footer_about", lang)}
+              </p>
             </div>
-            <div className="divider my-6" />
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-white/40">
-              <span>{t("footer_rights", lang)}</span>
-              <span className="font-display tracking-widest">{t("footer_tagline", lang)}</span>
+            <div>
+              <h4 className="font-display text-sm font-bold tracking-widest text-orange-300">{t("footer_features", lang)}</h4>
+              <ul className="mt-3 space-y-2 text-sm text-white/70">
+                <li>{t("footer_f1", lang)}</li>
+                <li>{t("footer_f2", lang)}</li>
+                <li>{t("footer_f3", lang)}</li>
+                <li>{t("footer_f4", lang)}</li>
+                <li>{t("footer_f5", lang)}</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display text-sm font-bold tracking-widest text-orange-300">{lang === "ar" ? "تواصل" : "Connect"}</h4>
+              <ul className="mt-3 space-y-2 text-sm text-white/70">
+                <li><a href="https://tiktok.com/@sceedalyazouri0" target="_blank" rel="noreferrer" className="hover:text-orange-300">🎵 TikTok @sceedalyazouri0</a></li>
+                <li><a href="https://instagram.com/sceedjor11" target="_blank" rel="noreferrer" className="hover:text-orange-300">📷 Instagram @sceedjor11</a></li>
+                <li>
+                  <a href="mailto:saeedjor11@gmail.com" className="inline-flex items-center gap-2 rounded-lg border border-orange-400/30 bg-orange-500/10 px-3 py-1.5 text-xs font-bold text-orange-300 transition-all hover:bg-orange-500/20">
+                    📧 saeedjor11@gmail.com
+                  </a>
+                </li>
+                <li className="text-xs text-white/50">{lang === "ar" ? "للمساعدة والدعم الفني" : "For help & technical support"}</li>
+                <li>🎮 PUBG ID: <b className="font-display text-white">5744469523</b></li>
+                <li>🇯🇴 Jordan</li>
+              </ul>
             </div>
           </div>
-        </section>
-      </main>
+          <div className="divider my-6" />
+          <div className="flex flex-col items-center justify-between gap-2 text-xs text-white/40 sm:flex-row">
+            <span>{t("footer_rights", lang)}</span>
+            <span className="font-display tracking-widest">{t("footer_tagline", lang)}</span>
+          </div>
+        </div>
+      </div>
+
       <PWABanner />
+      <MusicPlayer />
     </div>
   );
 }
 
-function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
-  return (
-    <div className="mb-6">
-      <div className="font-display text-xs tracking-[0.3em] text-orange-400">{eyebrow}</div>
-      <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">{title}</h2>
-      <p className="mt-2 max-w-2xl text-sm text-white/60">{subtitle}</p>
-    </div>
-  );
-}
+export default App;

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useLang } from "./LanguageContext";
-import { LANGUAGES, t } from "./i18n";
+import { useLang, LANGUAGES } from "./LanguageContext";
 
 export function LanguageSwitcher() {
   const { lang, setLang } = useLang();
@@ -9,9 +8,7 @@ export function LanguageSwitcher() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -33,23 +30,18 @@ export function LanguageSwitcher() {
 
       {open && (
         <div
-          className="absolute top-full mt-2 min-w-[180px] overflow-hidden rounded-xl border border-white/10 bg-[#0a0a14]/95 p-1 shadow-2xl backdrop-blur-lg"
+          className="absolute top-full mt-2 min-w-[180px] overflow-hidden rounded-xl border border-white/10 bg-[#0a0a14]/95 p-1 shadow-2xl backdrop-blur-lg z-50"
           style={{ [current.name === "العربية" ? "right" : "left"]: 0 }}
         >
           <div className="border-b border-white/5 px-3 py-1.5 text-[10px] uppercase tracking-widest text-white/40">
-            {t("nav_language", lang)}
+            Language
           </div>
           {LANGUAGES.map((l) => (
             <button
               key={l.id}
-              onClick={() => {
-                setLang(l.id);
-                setOpen(false);
-              }}
+              onClick={() => { setLang(l.id); setOpen(false); }}
               className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-right text-sm transition-colors ${
-                lang === l.id
-                  ? "bg-orange-500/15 text-orange-300"
-                  : "text-white/80 hover:bg-white/5"
+                lang === l.id ? "bg-orange-500/15 text-orange-300" : "text-white/80 hover:bg-white/5"
               }`}
             >
               <span className="text-lg">{l.flag}</span>

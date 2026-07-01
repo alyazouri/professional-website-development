@@ -1,14 +1,17 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { type Lang, LANGUAGES } from "./i18n";
 
-type Ctx = {
-  lang: Lang;
-  setLang: (l: Lang) => void;
-  dir: "rtl" | "ltr";
-};
+export type Lang = "ar" | "en" | "tr" | "ru" | "es";
 
+export const LANGUAGES: { id: Lang; name: string; flag: string; dir: "rtl" | "ltr" }[] = [
+  { id: "ar", name: "العربية", flag: "🇯🇴", dir: "rtl" },
+  { id: "en", name: "English", flag: "🇬🇧", dir: "ltr" },
+  { id: "tr", name: "Türkçe", flag: "🇹🇷", dir: "ltr" },
+  { id: "ru", name: "Русский", flag: "🇷🇺", dir: "ltr" },
+  { id: "es", name: "Español", flag: "🇪🇸", dir: "ltr" },
+];
+
+type Ctx = { lang: Lang; setLang: (l: Lang) => void; dir: "rtl" | "ltr" };
 const LanguageContext = createContext<Ctx | null>(null);
-
 const LS_KEY = "alyazouri_lang";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -17,7 +20,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem(LS_KEY) as Lang | null;
       if (saved && LANGUAGES.some((l) => l.id === saved)) return saved;
     } catch { /* ignore */ }
-    // detect from browser
     const nav = navigator.language?.toLowerCase() ?? "";
     if (nav.startsWith("tr")) return "tr";
     if (nav.startsWith("ru")) return "ru";
@@ -25,7 +27,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (nav.startsWith("en")) return "en";
     return "ar";
   });
-
   const dir = LANGUAGES.find((l) => l.id === lang)?.dir ?? "rtl";
 
   useEffect(() => {

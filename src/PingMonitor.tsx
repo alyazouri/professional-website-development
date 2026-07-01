@@ -36,7 +36,7 @@ export function PingMonitor() {
     });
   };
 
-  useEffect(() => { run(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { run(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const bestServer = best ? SERVERS.find((s) => s.id === best[0]) : null;
 
@@ -48,9 +48,7 @@ export function PingMonitor() {
           <div>
             <div className="font-display text-xs tracking-[0.3em] text-orange-400">{t("ping_live", lang)}</div>
             <h3 className="mt-1 text-xl font-bold text-white">{t("ping_live_title", lang)}</h3>
-            <p className="mt-1 text-sm text-white/60">
-              {t("ping_live_desc", lang)}
-            </p>
+            <p className="mt-1 text-sm text-white/60">{t("ping_live_desc", lang)}</p>
           </div>
           <button onClick={run} disabled={running} className="btn-primary rounded-xl px-4 py-2.5 text-sm disabled:opacity-50">
             {running ? t("ping_btn_measuring", lang) : t("ping_btn_remeasure", lang)}
@@ -63,8 +61,8 @@ export function PingMonitor() {
             const j = jitter[s.id];
             const l = loss[s.id];
             const isBest = bestServer?.id === s.id && done;
-            const quality = p == null ? "" : p < 60 ? t("ping_quality_excellent", lang) : p < 120 ? t("ping_quality_good", lang) : p < 200 ? t("ping_quality_medium", lang) : t("ping_quality_poor", lang);
-            const color = p == null ? "bg-white/10" : p < 60 ? "bg-emerald-500" : p < 120 ? "bg-amber-400" : p < 200 ? "bg-orange-500" : "bg-red-500";
+            const quality = p === null || p === undefined ? "" : p < 60 ? t("ping_quality_excellent", lang) : p < 120 ? t("ping_quality_good", lang) : p < 200 ? t("ping_quality_medium", lang) : t("ping_quality_poor", lang);
+            const color = p === null || p === undefined ? "bg-white/10" : p < 60 ? "bg-emerald-500" : p < 120 ? "bg-amber-400" : p < 200 ? "bg-orange-500" : "bg-red-500";
             return (
               <div
                 key={s.id}
@@ -89,7 +87,7 @@ export function PingMonitor() {
                   </div>
                   <div className="text-right">
                     <div className="font-display text-2xl font-bold text-white tabular-nums">
-                      {p == null ? <span className="text-white/30">—</span> : p}
+                      {p === null || p === undefined ? <span className="text-white/30">—</span> : p}
                     </div>
                     <div className="text-[10px] text-white/50">ms</div>
                   </div>
@@ -105,14 +103,14 @@ export function PingMonitor() {
                   </div>
                   <div className="rounded bg-black/30 p-1.5 text-center">
                     <div className="text-white/40">{t("ping_loss", lang)}</div>
-                    <div className="font-display text-white tabular-nums">{l ?? "—"}%</div>
+                    <div className="font-display text-white tabular-nums">{l ?? "—"}</div>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${color} ${running ? "animate-pulse" : ""}`} />
-                  <div className="stat-bar flex-1 h-1.5">
-                    <span style={{ width: p == null ? "0%" : `${Math.max(5, 100 - p / 3)}%` }} />
-                  </div>
+                <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/5">
+                  <div
+                    className={`h-full ${color} transition-all duration-500`}
+                    style={{ width: p === null || p === undefined ? "0%" : `${Math.min(100, (p / 300) * 100)}%` }}
+                  />
                 </div>
               </div>
             );
