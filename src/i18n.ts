@@ -18,7 +18,7 @@ export const translations = {
   hero_title1: { ar: "محسّن الأردن الاحترافي", en: "Jordan Optimizer Pro", tr: "Jordan Optimize Editörü", ru: "Профессиональный Оптимизатор Иордании", es: "Optimizador Jordánico" },
   hero_title2: { ar: "PUBG Mobile", en: "PUBG Mobile", tr: "PUBG Mobile", ru: "PUBG Mobile", es: "PUBG Mobile" },
   hero_desc: { ar: "حساسية احترافية مدعومة بالذكاء الاصطناعي — أقل بينغ ممكن، فريق أردني، تجنيد سريع، تغطية كاملة لـ", en: "Real AI-powered sensitivity — lowest ping possible, Jordanian team, fast recruitment, full coverage of", tr: "Gerçek AI destekli hassasiyet — en düşük ping, Rüya ekibi, hızlı alım, tam kapsamlı", ru: "Реальная чувствительность на базе ИИ — минимальный пинг, иорданская команда, быстрый набор, полное покрытие", es: "Sensibilidad real con IA — ping más bajo, equipo jordánico, reclutamiento rápido, cobertura total" },
-  hero_devices: { ar: "77 جهاز", en: "77 devices", tr: "77 cihaz", ru: "77 устройств", es: "77 dispositivos" },
+  hero_devices: { ar: "112+ جهاز", en: "112+ devices", tr: "112+ cihaz", ru: "112+ устройств", es: "112+ dispositivos" },
   hero_weapons: { ar: "44 سلاح", en: "44 weapons", tr: "44 silah", ru: "44 оружия", es: "44 armas" },
   hero_stats_devices: { ar: "الأجهزة", en: "Devices", tr: "Cihazlar", ru: "Устройства", es: "Dispositivos" },
   hero_stats_weapons: { ar: "الأسلحة", en: "Weapons", tr: "Silahlar", ru: "Оружие", es: "Armas" },

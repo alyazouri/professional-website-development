@@ -48,6 +48,37 @@ export const BRANDS: DeviceBrand[] = [
       d("iPad Air 5", 60, 120, 10.9, "2360×1640", "good"),
       d("iPad Mini 6", 60, 120, 8.3, "2266×1488", "good"),
       d("iPad 10", 60, 60, 10.9, "2360×1640", "average"),
+      // All iPad Pro generations
+      d("iPad Pro 13 (M5)", 120, 240, 13.0, "2752×2064", "excellent"),
+      d("iPad Pro 11 (M5)", 120, 240, 11.0, "2420×1668", "excellent"),
+      d("iPad Pro 12.9 (M1)", 120, 240, 12.9, "2732×2048", "excellent"),
+      d("iPad Pro 11 (M1)", 120, 240, 11.0, "2388×1668", "excellent"),
+      d("iPad Pro 12.9 (4th Gen)", 120, 240, 12.9, "2732×2048", "excellent"),
+      d("iPad Pro 11 (2nd Gen)", 120, 240, 11.0, "2388×1668", "excellent"),
+      d("iPad Pro 12.9 (3rd Gen)", 120, 120, 12.9, "2732×2048", "good"),
+      d("iPad Pro 11 (1st Gen)", 120, 120, 11.0, "2388×1668", "good"),
+      d("iPad Pro 12.9 (2nd Gen)", 120, 120, 12.9, "2732×2048", "good"),
+      d("iPad Pro 10.5", 120, 120, 10.5, "2224×1668", "good"),
+      d("iPad Pro 9.7", 60, 120, 9.7, "2048×1536", "average"),
+      // All iPad Air generations
+      d("iPad Air M3", 60, 120, 11.0, "2360×1640", "excellent"),
+      d("iPad Air M1", 60, 120, 10.9, "2360×1640", "excellent"),
+      d("iPad Air 4", 60, 120, 10.9, "2360×1640", "good"),
+      d("iPad Air 3", 60, 120, 10.5, "2224×1668", "good"),
+      d("iPad Air 2", 60, 120, 9.7, "2048×1536", "average"),
+      d("iPad Air 1", 60, 60, 9.7, "2048×1536", "average"),
+      // All iPad Mini generations
+      d("iPad Mini 7 (A17 Pro)", 60, 120, 8.3, "2266×1488", "excellent"),
+      d("iPad Mini 6", 60, 120, 8.3, "2266×1488", "good"),
+      d("iPad Mini 5", 60, 120, 7.9, "2048×1536", "good"),
+      d("iPad Mini 4", 60, 60, 7.9, "2048×1536", "average"),
+      // All iPad generations
+      d("iPad 11 (A16)", 60, 120, 10.9, "2360×1640", "good"),
+      d("iPad 9", 60, 60, 10.2, "2160×1620", "average"),
+      d("iPad 8", 60, 60, 10.2, "2160×1620", "average"),
+      d("iPad 7", 60, 60, 10.2, "2160×1620", "average"),
+      d("iPad 6", 60, 60, 9.7, "2048×1536", "average"),
+      d("iPad 5", 60, 60, 9.7, "2048×1536", "average"),
     ],
   },
   {
@@ -158,6 +189,39 @@ export const BRANDS: DeviceBrand[] = [
       d("Pixel 8 Pro", 120, 240, 6.7, "2992×1344", "excellent"),
       d("Pixel 8", 120, 240, 6.2, "2400×1080", "excellent"),
       d("Pixel 7 Pro", 120, 240, 6.7, "3120×1440", "good"),
+    ],
+  },
+  {
+    id: "redmagic", name: "Red Magic", icon: "👾", accent: "from-red-600 to-purple-700",
+    devices: [
+      // Red Magic 10 series
+      d("Red Magic 10 Pro+", 165, 960, 6.85, "2688×1216", "excellent"),
+      d("Red Magic 10 Pro", 144, 960, 6.85, "2688×1216", "excellent"),
+      // Red Magic 9 series
+      d("Red Magic 9 Pro+", 165, 960, 6.8, "2480×1116", "excellent"),
+      d("Red Magic 9 Pro", 120, 960, 6.8, "2480×1116", "excellent"),
+      // Red Magic 8 series
+      d("Red Magic 8 Pro+", 120, 960, 6.8, "2480×1116", "excellent"),
+      d("Red Magic 8 Pro", 120, 960, 6.8, "2480×1116", "excellent"),
+      // Red Magic 7 series
+      d("Red Magic 7S Pro", 120, 960, 6.8, "2400×1080", "excellent"),
+      d("Red Magic 7 Pro", 120, 960, 6.8, "2400×1080", "excellent"),
+      d("Red Magic 7", 165, 720, 6.8, "2400×1080", "excellent"),
+      // Red Magic 6 series
+      d("Red Magic 6S Pro", 165, 720, 6.8, "2400×1080", "excellent"),
+      d("Red Magic 6 Pro", 165, 500, 6.8, "2400×1080", "excellent"),
+      d("Red Magic 6R", 144, 360, 6.67, "2400×1080", "excellent"),
+      d("Red Magic 6", 165, 500, 6.8, "2400×1080", "excellent"),
+      // Red Magic 5 series
+      d("Red Magic 5S", 144, 240, 6.65, "2340×1080", "good"),
+      d("Red Magic 5G", 144, 240, 6.65, "2340×1080", "good"),
+      d("Red Magic 5G Lite", 60, 180, 6.65, "2340×1080", "average"),
+      // Red Magic 3 series
+      d("Red Magic 3S", 90, 240, 6.65, "2340×1080", "good"),
+      d("Red Magic 3", 90, 240, 6.65, "2340×1080", "good"),
+      // Red Magic Tablet
+      d("Red Magic Tablet Pro", 144, 480, 12.1, "2560×1600", "excellent"),
+      d("Red Magic Tablet", 120, 360, 10.9, "2560×1600", "excellent"),
     ],
   },
   {
@@ -319,7 +383,77 @@ export const JORDAN_DNS: DnsServer[] = [
   { id: "dns10", ip: "82.212.72.18", label: "JO-DNS 10", isp: "Damamax", base: 7 },
   { id: "dns11", ip: "82.212.79.115", label: "JO-DNS 11", isp: "Damamax", base: 7 },
   { id: "dns12", ip: "82.212.84.139", label: "JO-DNS 12", isp: "Damamax", base: 8 },
+  { id: "dns13", ip: "77.245.13.191", label: "JO-DNS 13", isp: "Zain", base: 6 },
+  { id: "dns14", ip: "80.90.161.242", label: "JO-DNS 14", isp: "Orange", base: 7 },
+  { id: "dns15", ip: "80.90.172.146", label: "JO-DNS 15", isp: "Orange", base: 7 },
 ];
+
+// ==================== PRO PLAYER PRESETS (#36 Transfer Learning) ====================
+export type ProPlayer = {
+  name: string; flag: string; style: string;
+  fingers: number; gyro: "off" | "scope" | "always";
+  device: string; weapon: string;
+  sens: { cam: number[]; ads: number[]; gyro: number[]; adsGyro: number[] };
+};
+
+export const PRO_PLAYERS: ProPlayer[] = [
+  {
+    name: "Jonathan Gaming", flag: "🇮🇳", style: "aggressive",
+    fingers: 4, gyro: "always", device: "iPhone 15 Pro Max", weapon: "M416",
+    sens: {
+      cam:   [95,70,60,30,25,18,15,12],
+      ads:   [95,70,60,35,30,25,22,12],
+      gyro:  [300,300,300,300,236,171,101,76],
+      adsGyro:[300,300,300,301,236,171,101,76],
+    },
+  },
+  {
+    name: "ScoutOP", flag: "🇮🇳", style: "headshot",
+    fingers: 4, gyro: "scope", device: "iPad Pro M2", weapon: "M416",
+    sens: {
+      cam:   [90,85,55,30,25,20,15,12],
+      ads:   [90,85,60,35,30,25,20,14],
+      gyro:  [0,0,400,300,275,200,170,70],
+      adsGyro:[0,0,400,350,275,200,170,100],
+    },
+  },
+  {
+    name: "Levinho", flag: "🇧🇷", style: "balanced",
+    fingers: 4, gyro: "always", device: "ROG Phone 8 Pro", weapon: "M416",
+    sens: {
+      cam:   [100,95,60,35,30,22,15,12],
+      ads:   [100,95,60,38,30,25,18,12],
+      gyro:  [350,350,340,300,250,180,100,80],
+      adsGyro:[370,370,350,310,260,190,110,85],
+    },
+  },
+  {
+    name: "Mortal", flag: "🇮🇳", style: "aggressive",
+    fingers: 4, gyro: "always", device: "iPhone 14 Pro Max", weapon: "AKM",
+    sens: {
+      cam:   [110,100,65,40,30,22,18,14],
+      ads:   [105,95,65,42,33,28,22,15],
+      gyro:  [380,370,350,310,260,180,110,90],
+      adsGyro:[400,390,360,330,280,200,120,95],
+    },
+  },
+  {
+    name: "Athena Gaming", flag: "🇮🇳", style: "spray",
+    fingers: 4, gyro: "always", device: "iPhone 14 Pro Max", weapon: "M416",
+    sens: {
+      cam:   [120,110,70,45,35,25,18,13],
+      ads:   [110,100,65,45,35,28,20,15],
+      gyro:  [400,400,380,340,280,220,130,100],
+      adsGyro:[400,400,390,360,300,240,140,105],
+    },
+  },
+];
+
+/** Finger-friendly format for each scope: TPP, FPP, NoScope, Red, 2x, 3x, 4x, 6x, 8x */
+export function getProSens(player: ProPlayer, scopeIdx: number, table: "cam" | "ads" | "gyro" | "adsGyro"): number {
+  const arr = player.sens[table];
+  return arr[Math.min(scopeIdx, arr.length - 1)] ?? 50;
+}
 
 export const FINGERS = [2, 3, 4, 5, 6];
 

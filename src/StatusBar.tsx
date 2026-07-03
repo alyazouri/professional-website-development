@@ -16,12 +16,13 @@ export function StatusBar({ ping }: { ping: number | null }) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-white/8 bg-[#05070c]/80 backdrop-blur-xl">
       <div className="container-section flex h-14 items-center justify-between gap-3">
-        <a href="#top" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-red-600 font-display text-base font-black text-white shadow-lg">
+        <a href="#top" className="flex items-center gap-2 group">
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-red-600 font-display text-base font-black text-white shadow-lg shadow-orange-500/30 group-hover:shadow-orange-500/50 transition-shadow">
+            <span className="absolute -top-0.5 -left-0.5 text-[7px]">🦅</span>
             A
           </span>
           <span className="font-display text-sm font-black tracking-wide text-white">
-            ALYAZOURI <span className="text-orange-400">2026</span>
+            ALYAZOURI <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">2026</span>
             <span className="hidden text-[10px] font-medium text-white/40 sm:inline"> · Jordan</span>
           </span>
         </a>

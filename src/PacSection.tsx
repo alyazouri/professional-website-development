@@ -2,6 +2,22 @@ import { useState } from "react";
 import { useLang } from "./LanguageContext";
 import { t } from "./i18n";
 
+function generateDynamicPAC(bestDnsIps: string[]): string {
+  const proxies = bestDnsIps.map(ip => `PROXY ${ip}:8080`).join("; ");
+  return `function FindProxyForURL(url, host) {
+  if (shExpMatch(host, "*.pubgmobile.com") ||
+      shExpMatch(host, "*.tencent.com") ||
+      shExpMatch(host, "*.tencentgames.com") ||
+      shExpMatch(host, "*.epicgames.com") ||
+      shExpMatch(host, "*.krafton.com") ||
+      shExpMatch(host, "*.pubg.com") ||
+      shExpMatch(host, "*.amazonaws.com")) {
+    return "${proxies}; DIRECT";
+  }
+  return "DIRECT";
+}`;
+}
+
 const PAC_URL = "https://alyazouri.pages.dev/jordan.pac";
 
 type Tab = "android" | "ios" | "windows";
@@ -26,9 +42,12 @@ export function PacSection() {
     { id: "windows", icon: "🪟", label: "Windows" },
   ];
 
+  const [customPAC, setCustomPAC] = useState(false);
+  const dynUrl = customPAC ? `data:text/plain;base64,${btoa(generateDynamicPAC(["94.142.37.179","92.253.13.100","46.185.162.241"]))}` : PAC_URL;
+
   const copy = () => {
     try {
-      navigator.clipboard?.writeText(PAC_URL);
+      navigator.clipboard?.writeText(customPAC ? generateDynamicPAC(["94.142.37.179","92.253.13.100","46.185.162.241"]) : PAC_URL);
     } catch { /* ignore */ }
     setCopied(true);
     setShowRestart(true);
@@ -64,16 +83,21 @@ export function PacSection() {
             <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
               ✅ {t("pac_ready", lang)}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-white/40">{t("pac_link_label", lang)}</div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-[10px] uppercase tracking-widest text-white/40">{t("pac_link_label", lang)}</div>
+              <button onClick={() => setCustomPAC((c: boolean) => !c)} className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${customPAC ? "bg-purple-500/20 text-purple-300" : "bg-white/5 text-white/50"}`}>
+                {customPAC ? "🔄 DYNAMIC" : "📦 STATIC"}
+              </button>
+            </div>
             <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
               <code className="flex-1 break-all rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-orange-200">
-                {PAC_URL}
+                {customPAC ? generateDynamicPAC(["94.142.37.179","92.253.13.100","46.185.162.241"]).slice(0, 80)+"..." : PAC_URL}
               </code>
               <div className="flex gap-2">
                 <button onClick={copy} className="btn-primary rounded-lg px-3 py-2 text-xs">
                   {copied ? t("pac_copied", lang) : t("pac_copy", lang)}
                 </button>
-                <a href={PAC_URL} target="_blank" rel="noreferrer" className="btn-ghost rounded-lg px-3 py-2 text-xs">
+                <a href={customPAC ? dynUrl : PAC_URL} target="_blank" rel="noreferrer" className="btn-ghost rounded-lg px-3 py-2 text-xs">
                   {t("pac_open", lang)}
                 </a>
               </div>

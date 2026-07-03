@@ -1,339 +1,285 @@
-// Sensitivity physics engine + UI components — ALYAZOURI 2026
+/**
+ * PUBG MOBILE REALISTIC SENSITIVITY ENGINE
+ * Calibrated : Gamuters (April 2026) / 4-finger / M416 / mid-range Android
+ * Reference: TPP Cam=135, ADS=130, Gyro=370, ADS Gyro=390
+ */
+
 import { useLang } from "./LanguageContext";
 import { t } from "./i18n";
-import type { Device } from "./data";
-import type { ProProfileId } from "./data";
-import { PRO_PROFILES } from "./data";
 import { getWeaponProfile } from "./weaponProfiles";
+import type { Device, ProProfileId } from "./data";
+import { PRO_PROFILES } from "./data";
+import { reactionTimeCompensation } from "./SensitivityOptimizer";
+
+// =============== TYPES ===============
+export type ScopeSens = {
+  noScope: number; red: number; scope2: number;
+  scope3: number; scope4: number; scope6: number; scope8: number;
+  tpp: number; fpp: number;
+};
 
 export type GyroMode = "off" | "scope" | "always";
 
 export type SensParams = {
-  deviceId: string;
-  device: Device;
-  brandId: string;
-  fingers: number;
-  styleId: string;
-  gyroMode: GyroMode;
-  weaponId: string;
-  weaponName: string;
-  weaponRecoil: number;
-  weaponRange: number;
-  weaponType: string;
+  deviceId: string; device: Device; brandId: string;
+  fingers: number; styleId: string; gyroMode: GyroMode;
+  weaponId: string; weaponName: string;
+  weaponRecoil: number; weaponRange: number; weaponType: string;
   proProfile: string;
 };
 
-export type ScopeSens = {
-  noScope: number;
-  red: number;
-  scope2: number;
-  scope3: number;
-  scope4: number;
-  scope6: number;
-  scope8: number;
-  tpp: number;
-  fpp: number;
-};
-
 export type Sens = {
-  cam: ScopeSens;
-  ads: ScopeSens;
+  cam: ScopeSens; ads: ScopeSens;
   gyro: { cam: ScopeSens; ads: ScopeSens };
   freeLook: { cam: number; parashoot: number; vehicle: number };
   aiScore: number;
   factors: { deviceFactor: number; weaponFactor: number; fingerFactor: number; styleFactor: number };
 };
 
-// ==================== MAPPINGS ====================
-const STYLE_MAP: Record<string, number> = {
-  balanced: 1.0,
-  aggressive: 1.05,
-  headshot: 0.92,
-  spray: 1.08,
-  competitive: 0.97,
-  close: 1.1,
+export type SavedProfile = { id: string; name: string; savedAt: number; params: SensParams };
+
+// =============== CALIBRATED BASE ===============
+// Gamuters reference: 4-finger, balanced, M416 (recoil=52), mid-range Android
+
+const REF_TPP_CAM = 135;
+const REF_TPP_GYRO = 370;
+
+// =============== SCOPE CASCADE ===============
+// Gamuters Camera ratios: TPP=135, NoScope=135, Red=60, 2x=40, 3x=25, 4x=20, 6x=15, 8x=12
+const CAM_SCOPE: Record<string, number> = {
+  noScope: 1.00, red: 0.444, scope2: 0.296, scope3: 0.185,
+  scope4: 0.148, scope6: 0.111, scope8: 0.089,
 };
 
-const TYPE_MAP: Record<string, number> = {
-  ar: 1.0,
-  smg: 1.05,
-  dmr: 0.92,
-  sniper: 0.85,
-  lmg: 1.02,
-  shotgun: 1.1,
-  pistol: 1.08,
+// Gamuters ADS ratios (vs Camera of same scope)
+const ADS_SCOPE: Record<string, number> = {
+  noScope: 0.963, red: 1.000, scope2: 1.100, scope3: 1.440,
+  scope4: 1.500, scope6: 1.467, scope8: 1.667,
+  tpp: 0.963, fpp: 0.962,
 };
 
-const FINGER_MAP: Record<number, number> = {
-  2: 1.06,
-  3: 1.03,
-  4: 1.0,
-  5: 0.98,
-  6: 0.96,
+// Gamuters Gyro ratios (vs TPP Gyro=370)
+const GYRO_SCOPE: Record<string, number> = {
+  noScope: 1.000, red: 0.784, scope2: 0.595, scope3: 0.473,
+  scope4: 0.405, scope6: 0.230, scope8: 0.162,
 };
 
-const SCOPE_DEFS: { key: keyof ScopeSens; mag: number }[] = [
-  { key: "noScope", mag: 1 },
-  { key: "red", mag: 1.2 },
-  { key: "scope2", mag: 2 },
-  { key: "scope3", mag: 3 },
-  { key: "scope4", mag: 4 },
-  { key: "scope6", mag: 6 },
-  { key: "scope8", mag: 8 },
-];
+// Gamuters ADS Gyro boost (vs Gyro Cam of same scope)
+const ADS_GYRO_SCOPE: Record<string, number> = {
+  noScope: 1.054, red: 1.017, scope2: 1.036, scope3: 1.074,
+  scope4: 1.107, scope6: 1.035, scope8: 1.100,
+  tpp: 1.054, fpp: 0.987,
+};
 
+// =============== FINGER FACTORS ===============
+// More fingers = more control → can handle LOWER sensitivity
+const FINGER: Record<number, number> = {
+  2: 1.06, 3: 1.03, 4: 1.00, 5: 0.98, 6: 0.96,
+};
+
+// =============== STYLE FACTORS ===============
+type StyleMod = { cam: number; ads: number; gyro: number };
+const STYLE: Record<string, StyleMod> = {
+  balanced:    { cam: 1.00, ads: 1.00, gyro: 1.00 },
+  aggressive:  { cam: 1.05, ads: 1.03, gyro: 1.08 },
+  headshot:    { cam: 0.92, ads: 0.95, gyro: 0.94 },
+  spray:       { cam: 0.97, ads: 1.06, gyro: 1.12 },
+  competitive: { cam: 0.95, ads: 0.97, gyro: 0.93 },
+  close:       { cam: 1.10, ads: 1.05, gyro: 1.15 },
+  closespray:  { cam: 1.12, ads: 1.10, gyro: 1.20 },
+  longspray:   { cam: 0.88, ads: 1.12, gyro: 1.05 },
+};
+
+// =============== WEAPON FACTORS ===============
+// Higher recoil → need HIGHER ADS + Gyro to pull down
+// Weapon TYPE also matters (SMG faster, Sniper slower)
+const TYPE_MOD: Record<string, StyleMod> = {
+  ar:      { cam: 1.00, ads: 1.00, gyro: 1.00 },
+  smg:     { cam: 1.05, ads: 1.02, gyro: 1.08 },
+  dmr:     { cam: 0.95, ads: 0.93, gyro: 0.94 },
+  sniper:  { cam: 0.92, ads: 0.90, gyro: 0.90 },
+  lmg:     { cam: 1.00, ads: 1.03, gyro: 1.05 },
+  shotgun: { cam: 1.05, ads: 1.00, gyro: 1.05 },
+  pistol:  { cam: 1.08, ads: 1.00, gyro: 1.10 },
+};
+
+// Per-weapon recoil factor (modifies ADS + Gyro based on weapon's vertical recoil)
+// M416 (52 recoil) = 1.00 baseline
+function weaponRecoilFactor(recoil: number, fireRate: number): StyleMod {
+  const baseRecoil = 52; // M416 reference
+  const recoilEffect = 1.0 + (recoil - baseRecoil) / 350;
+
+  // Fire rate also matters — faster guns need more gyro control
+  const baseRate = 700; // M416 RPM
+  const rateEffect = 1.0 + (fireRate - baseRate) / 3500;
+
+  // Combine: higher recoil + higher fire rate = more ADS/gyro needed
+  const ads = clamp(recoilEffect * rateEffect, 0.85, 1.15);
+  const gyro = clamp(recoilEffect * rateEffect * 1.05, 0.80, 1.20);
+
+  return { cam: 1.00, ads, gyro };
+}
+
+// =============== DEVICE FACTORS ===============
+function calcDeviceFactor(device: Device): number {
+  const fps   = device.fps >= 165 ? 0.96 : device.fps >= 120 ? 1.00 : device.fps >= 90 ? 1.04 : 1.09;
+  const touch = device.touchRate >= 720 ? 0.95 : device.touchRate >= 480 ? 0.98 : device.touchRate >= 240 ? 1.00 : 1.04;
+  const size  = device.screenSize >= 12 ? 1.04 : device.screenSize >= 10 ? 1.01 : device.screenSize >= 6.5 ? 0.99 : 0.96;
+  const ppi = computePPI(device);
+  const ppif  = ppi >= 560 ? 0.96 : ppi >= 450 ? 0.98 : ppi >= 350 ? 1.00 : 1.04;
+  const gyro  = device.gyroQuality === "excellent" ? 1.00 : device.gyroQuality === "good" ? 0.96 : 0.90;
+  return fps * touch * size * ppif * gyro;
+}
+
+// =============== HELPERS ===============
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
-function computePPI(device: Device): number {
-  const parts = device.resolution.split("×");
-  if (parts.length !== 2) return 400;
-  const w = parseInt(parts[0], 10);
-  const h = parseInt(parts[1], 10);
+export function computePPI(device: Device): number {
+  const p = device.resolution.split("×");
+  if (p.length !== 2) return 400;
+  const w = parseInt(p[0], 10), h = parseInt(p[1], 10);
   if (!w || !h || !device.screenSize) return 400;
   return Math.round(Math.sqrt(w * w + h * h) / device.screenSize);
 }
 
-/**
- * ============================================================================
- *  ALYAZOURI SENSITIVITY PHYSICS ENGINE — v2 (deep calibration)
- * ============================================================================
- *
- *  The engine layers 6 calibrated sub-systems into one output:
- *
- *  1) DEVICE FACTOR (D)
- *        D = fpsTier · touchTier · sizeTier · ppiTier · gyroTier
- *        Each tier is a stepped response curve to the device's raw specs.
- *
- *  2) BASE (no-scope camera reference, ~ PUBG 0–100 scale)
- *        Base = 140 · D · F_f · S_p · W_t · P_m
- *        where F_f=finger, S_p=style, W_t=weapon-type, P_m=pro multiplier.
- *
- *  3) WEAPON COMPENSATION (W_k) — recoil-aware
- *        W_k = recoilComp · recoveryBoost · rangeComp
- *        recoilComp   = 1 − κ·Rᵥ        (harder vertical recoil lowers sens)
- *        recoveryBoost= 0.92 + 0.16·(Rc) (fast recovery gives a little back)
- *        rangeComp    = f(weaponRange)   (long-range guns tighten further)
- *
- *  4) SCOPE CURVE σ(m) — pro-tuned per magnification
- *        A hand-fitted decay (not a single power law) so every scope feels
- *        distinct. Higher zoom = much lower sensitivity for pixel precision.
- *
- *  5) ADS  → A_d = R_s · 0.88
- *  6) GYRO → G_y = R_s · γ(m) · Gq      (γ is its own per-scope curve)
- *
- *  TPP / FPP are derived from the no-scope (mag 1) value so they stay
- *  independent of the scope curve:  TPP = Base·W_k ,  FPP = TPP·0.90
- * ============================================================================
- */
+// =============== SCOPE KEYS ===============
+type ScopeKey = keyof ScopeSens;
+const SCOPE_KEYS: ScopeKey[] = ["noScope","red","scope2","scope3","scope4","scope6","scope8"];
+
+export const SCOPE_DEFS: { key: ScopeKey; icon: string; labelKey: string }[] = [
+  { key: "noScope", icon: "⚪", labelKey: "sens_no_scope" },
+  { key: "red",     icon: "🔴", labelKey: "sens_red_dot" },
+  { key: "scope2",  icon: "🎯", labelKey: "sens_2x" },
+  { key: "scope3",  icon: "🎯", labelKey: "sens_3x" },
+  { key: "scope4",  icon: "🔭", labelKey: "sens_4x" },
+  { key: "scope6",  icon: "🔭", labelKey: "sens_6x" },
+  { key: "scope8",  icon: "🔭", labelKey: "sens_8x" },
+];
+
+// =============== MAIN ENGINE ===============
 export function computeSensitivity(p: SensParams): Sens {
   const { device, fingers, styleId, gyroMode, weaponName, weaponRecoil, weaponRange, weaponType, proProfile } = p;
 
-  // ---- (1) DEVICE FACTOR (D): stepped response curves ----
-  const fpsTier = device.fps >= 165 ? 0.96 : device.fps >= 120 ? 1.0 : device.fps >= 90 ? 1.04 : 1.09;
-  const touchTier = device.touchRate >= 720 ? 0.95 : device.touchRate >= 480 ? 0.98 : device.touchRate >= 240 ? 1.0 : 1.04;
-  const sizeTier = device.screenSize >= 12 ? 1.04 : device.screenSize >= 10 ? 1.01 : device.screenSize >= 6.5 ? 0.99 : 0.96;
-  const ppi = computePPI(device);
-  const ppiTier = ppi >= 560 ? 0.96 : ppi >= 450 ? 0.98 : ppi >= 350 ? 1.0 : 1.04;
-  const gyroTier = device.gyroQuality === "excellent" ? 1.0 : device.gyroQuality === "good" ? 0.96 : 0.9;
-  const deviceFactor = fpsTier * touchTier * sizeTier * ppiTier * gyroTier;
+  // ---- DEVICE + REACTION TIME ----
+  const devF = calcDeviceFactor(device) * reactionTimeCompensation(device);
+  const Gq = device.gyroQuality === "excellent" ? 1.00 : device.gyroQuality === "good" ? 0.96 : 0.90;
 
-  // ---- (2) multipliers & BASE ----
-  const fingerFactor = FINGER_MAP[fingers] ?? 1.0;
-  const styleFactor = STYLE_MAP[styleId] ?? 1.0;
-  const typeFactor = TYPE_MAP[weaponType] ?? 1.0;
-  const pro = PRO_PROFILES.find((x) => x.id === (proProfile as ProProfileId));
-  const proMultiplier = pro ? pro.sensMultiplier : 1.0;
+  // ---- FINGER ----
+  const fingF = FINGER[fingers] ?? 1.00;
 
-  // stability-analysis weapon factor: lower recoil = more stable
-  const weaponFactor = clamp((100 - weaponRecoil * 0.5) / 100, 0.4, 1);
+  // ---- STYLE ----
+  const sty = STYLE[styleId] ?? STYLE.balanced;
 
-  const base = 140 * deviceFactor * fingerFactor * styleFactor * typeFactor * proMultiplier;
+  // ---- PRO PROFILE ----
+  const pro = PRO_PROFILES.find(x => x.id === (proProfile as ProProfileId));
+  const proM = pro?.sensMultiplier ?? 1.00;
 
-  // ---- (3) WEAPON COMPENSATION W_k ----
-  const profile = getWeaponProfile(weaponName, weaponRecoil, weaponRange, weaponType);
-  const KAPPA = 0.20; // recoil stiffness coefficient
-  const recoilComp = 1 - (profile.verticalRecoil / 100) * KAPPA;
-  const recoveryBoost = 0.92 + (profile.recovery / 100) * 0.16;
-  const rangeComp = weaponRange > 400 ? 0.85 : weaponRange > 200 ? 0.92 : weaponRange > 80 ? 0.98 : 1.0;
-  const Wk = recoilComp * recoveryBoost * rangeComp;
+  // ---- WEAPON PROFILE ----
+  const wp = getWeaponProfile(weaponName, weaponRecoil, weaponRange, weaponType);
+  const wRecoil = wp.verticalRecoil;
+  const wFireRate = wp.fireRate;
+  const wType = wp.type;
 
-  // ---- (4) SCOPE CURVES (pro-tuned per magnification) ----
-  // σ(m): camera sensitivity ratio vs base. mag 1 = 1.0 (no scope).
-  const SIGMA: Record<number, number> = {
-    1: 1.0, 1.2: 0.70, 2: 0.42, 3: 0.29, 4: 0.23, 6: 0.15, 8: 0.10,
-  };
-  // γ(m): gyro sensitivity ratio vs base (gyro runs much higher at low zoom,
-  // then decays faster than camera at high magnification).
-  const GAMMA: Record<number, number> = {
-    1: 2.30, 1.2: 1.85, 2: 1.50, 3: 1.20, 4: 0.95, 6: 0.70, 8: 0.50,
-  };
+  // Weapon modifiers: type + specific recoil
+  const wt = TYPE_MOD[wType] ?? TYPE_MOD.ar;
+  const wr = weaponRecoilFactor(wRecoil, wFireRate);
 
-  const buildTable = (ratioMap: Record<number, number>, extra: number): ScopeSens => {
-    const out = {} as ScopeSens;
-    const ns = ratioMap[1] ?? 1; // no-scope ratio → drives TPP/FPP
-    for (const s of SCOPE_DEFS) {
-      out[s.key] = Math.round(clamp(base * (ratioMap[s.mag] ?? ns) * Wk * extra, 1, 400));
+  // ===== CAMERA = REF_TPP_CAM × devF × fingF × sty.cam × wt.cam × proM =====
+  const tppCam = clamp(Math.round(REF_TPP_CAM * devF * fingF * sty.cam * wt.cam * proM), 1, 300);
+  const fppCam = clamp(Math.round(tppCam * 0.963), 1, 300);
+  const cam: Record<string, number> = { tpp: tppCam, fpp: fppCam };
+  for (const k of SCOPE_KEYS) cam[k] = clamp(Math.round(tppCam * (CAM_SCOPE[k] ?? 0.15)), 1, 300);
+
+  // ===== ADS = Camera of same scope × ADS_SCOPE × wr.ads × sty.ads × wt.ads =====
+  const ads: Record<string, number> = {};
+  for (const k of [...SCOPE_KEYS, "tpp" as const, "fpp" as const]) {
+    const camVal = cam[k];
+    const ratio = ADS_SCOPE[k] ?? 1.0;
+    ads[k] = clamp(Math.round(camVal * ratio * wr.ads * sty.ads * wt.ads), 1, 300);
+  }
+
+  // ===== GYRO CAM = REF_TPP_GYRO × devF × fingF × sty.gyro × wt.gyro × wr.gyro × Gq =====
+  const gyroMultiplier = REF_TPP_GYRO * devF * fingF * sty.gyro * wt.gyro * wr.gyro * Gq;
+
+  const buildGyro = (mode: GyroMode): Record<string, number> => {
+    if (mode === "off") {
+      const z: Record<string, number> = {};
+      for (const k of [...SCOPE_KEYS, "tpp", "fpp"]) z[k] = 0;
+      return z;
     }
-    // TPP / FPP derived from no-scope, independent of the scope curve
-    out.tpp = Math.round(clamp(base * ns * Wk * extra, 1, 400));
-    out.fpp = Math.round(clamp(base * ns * Wk * extra * 0.9, 1, 400));
+    const out: Record<string, number> = {};
+    for (const k of SCOPE_KEYS) {
+      const ratio = GYRO_SCOPE[k] ?? 0.2;
+      if (mode === "scope" && (k === "noScope" || k === "red")) { out[k] = 0; continue; }
+      out[k] = clamp(Math.round(REF_TPP_GYRO * ratio * devF * fingF * sty.gyro * wt.gyro * wr.gyro * Gq), 1, 400);
+    }
+    out.tpp = mode === "scope" ? 0 : clamp(Math.round(gyroMultiplier), 1, 400);
+    out.fpp = mode === "scope" ? 0 : clamp(Math.round(gyroMultiplier * 1.04), 1, 400);
     return out;
   };
+  const gyroCam = buildGyro(gyroMode);
 
-  // ---- (5)(6) camera / ADS / gyro tables ----
-  const cam = buildTable(SIGMA, 1.0);      // R_s
-  const ads = buildTable(SIGMA, 0.88);      // A_d = R_s · 0.88
-  // GYRO MODE — physically distinct profiles (PUBG-accurate):
-  //   • off    → no gyro at all (tables hidden in UI)
-  //   • scope  → gyro ONLY while aiming down a scope.
-  //              Hip-fire (no-scope / TPP / FPP) gyro = 0 (touch only),
-  //              scoped entries (Red Dot → 8×) get tuned gyro values.
-  //   • always → gyro active at ALL times incl. hip-fire → every entry is live,
-  //              slightly more responsive than scope-only for tracking.
-  const Gq = device.gyroQuality === "excellent" ? 1.0 : device.gyroQuality === "good" ? 0.94 : 0.86;
-  const gyroResponsive = gyroMode === "always" ? 1.12 : 0.9; // always = a touch hotter
-  const buildGyro = (adsMul: number): ScopeSens => {
-    const out = {} as ScopeSens;
-    // hip-fire gyro value: 0 for scope-only (gyro doesn't fire un-scoped)
-    const hip = gyroMode === "scope"
-      ? 0
-      : Math.round(clamp(base * (GAMMA[1] ?? 1) * Wk * Gq * gyroResponsive, 1, 400));
-    for (const s of SCOPE_DEFS) {
-      out[s.key] = s.mag <= 1
-        ? hip
-        : Math.round(clamp(base * (GAMMA[s.mag] ?? 1) * Wk * Gq * gyroResponsive * adsMul, 1, 400));
-    }
-    out.tpp = hip;
-    out.fpp = Math.round(hip * 0.9);
-    return out;
-  };
-  const gyro = gyroMode === "off"
-    ? { cam: { ...cam }, ads: { ...ads } }                       // hidden when off
-    : { cam: buildGyro(1.0), ads: buildGyro(0.92) };            // G_y = R_s · γ(m) · Wₖ · Gq · responsive
+  // ===== ADS GYRO = Gyro Cam × ADS_GYRO_SCOPE × wr.ads × sty.ads =====
+  const gyroAds: Record<string, number> = {};
+  for (const k of [...SCOPE_KEYS, "tpp" as const, "fpp" as const]) {
+    const boost = ADS_GYRO_SCOPE[k] ?? 1.05;
+    gyroAds[k] = clamp(Math.round(gyroCam[k] * boost * wr.ads * sty.ads), gyroCam[k] > 0 ? 1 : 0, 400);
+  }
 
-  // ---- Free look (derived from base·Wk) ----
+  // ===== FREE LOOK =====
   const freeLook = {
-    cam: Math.round(clamp(base * Wk * 0.9, 1, 400)),
-    parashoot: Math.round(clamp(base * Wk * 1.05, 1, 400)),
-    vehicle: Math.round(clamp(base * Wk * 0.8, 1, 400)),
+    cam:       clamp(Math.round(tppCam * 1.04), 1, 300),
+    parashoot: clamp(Math.round(tppCam * 1.19), 1, 300),
+    vehicle:   clamp(Math.round(tppCam * 1.04), 1, 300),
   };
 
-  // ---- AI SCORE (weighted compatibility model) ----
-  const deviceCap =
-    (device.fps >= 120 ? 100 : device.fps >= 90 ? 85 : 70) * 0.3 +
-    (device.touchRate >= 480 ? 95 : device.touchRate >= 240 ? 80 : 60) * 0.2 +
-    (device.gyroQuality === "excellent" ? 100 : device.gyroQuality === "good" ? 85 : 70) * 0.2;
-  const fingerMatch = fingers >= 4 ? 95 : fingers === 3 ? 85 : 75;
-  const styleMatch = clamp(Math.round(styleFactor * 95), 0, 100);
-  const weaponCompat = profile.firstShotAccuracy * 0.5 + profile.recovery * 0.5;
-  const gyroScore = device.gyroQuality === "excellent" ? 95 : device.gyroQuality === "good" ? 85 : 70;
-  // Gyro mode aligns the score with the chosen sensitivity profile:
-  // using gyro raises aim potential (always > scope > off).
-  const gyroModeBonus = gyroMode === "off" ? -3 : gyroMode === "scope" ? 2 : 4;
-  const aiScore = clamp(
-    Math.round(deviceCap * 0.3 + fingerMatch * 0.2 + styleMatch * 0.15 + weaponCompat * 0.2 + gyroScore * 0.15 + gyroModeBonus),
-    1,
-    99
-  );
+  // ===== FACTORS (display) =====
+  const deviceFactor = devF;
+  const weaponFactor = clamp((100 - wRecoil * 0.5) / 100, 0.4, 1);
+  const fingerFactor = 1 / fingF;
+  const styleFactor = sty.cam;
+
+  // ===== AI SCORE =====
+  const gyroScore = gyroMode === "off" ? 0.5 : device.gyroQuality === "excellent" ? 1.0 : device.gyroQuality === "good" ? 0.8 : 0.6;
+  const aiScore = Math.round(clamp((deviceFactor*0.3+weaponFactor*0.2+fingerFactor*0.2+styleFactor*0.15+gyroScore*0.15)*100, 1, 100));
 
   return {
-    cam,
-    ads,
-    gyro,
-    freeLook,
-    aiScore,
+    cam: cam as ScopeSens, ads: ads as ScopeSens,
+    gyro: { cam: gyroCam as ScopeSens, ads: gyroAds as ScopeSens },
+    freeLook, aiScore,
     factors: { deviceFactor, weaponFactor, fingerFactor, styleFactor },
   };
 }
 
-// ==================== SAVED PROFILES ====================
-const PROFILES_KEY = "alyazouri_profiles";
-
-export type SavedProfile = { id: string; name: string; params: SensParams; savedAt: number };
-
-export function loadProfiles(): SavedProfile[] {
-  try {
-    const raw = localStorage.getItem(PROFILES_KEY);
-    return raw ? (JSON.parse(raw) as SavedProfile[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveProfiles(profiles: SavedProfile[]) {
-  try {
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
-  } catch { /* ignore */ }
-}
-
-// ==================== UI: SENSITIVITY TABLE ====================
-const ROW_ICONS: Record<string, string> = {
-  noScope: "⭕",
-  red: "🔴",
-  scope2: "2️⃣",
-  scope3: "3️⃣",
-  scope4: "4️⃣",
-  scope6: "6️⃣",
-  scope8: "8️⃣",
-};
+// =============== UI ===============
 
 export function SensTable({
-  label,
-  data,
-  color = "orange",
-  showTppFpp = true,
+  title, icon, data, max, accent = "text-orange-300",
+  barClass = "from-orange-500 to-amber-400", showTppFpp = true,
 }: {
-  label: string;
-  data: ScopeSens;
-  color?: "orange" | "purple";
-  showTppFpp?: boolean;
+  title: string; icon: string; data: ScopeSens; max: number;
+  accent?: string; barClass?: string; showTppFpp?: boolean;
 }) {
   const { lang } = useLang();
-  const rows: { icon: string; label: string; value: number }[] = [
-    { icon: ROW_ICONS.noScope, label: t("sens_no_scope", lang), value: data.noScope },
-    { icon: ROW_ICONS.red, label: t("sens_red_dot", lang), value: data.red },
-    { icon: ROW_ICONS.scope2, label: t("sens_2x", lang), value: data.scope2 },
-    { icon: ROW_ICONS.scope3, label: t("sens_3x", lang), value: data.scope3 },
-    { icon: ROW_ICONS.scope4, label: t("sens_4x", lang), value: data.scope4 },
-    { icon: ROW_ICONS.scope6, label: t("sens_6x", lang), value: data.scope6 },
-    { icon: ROW_ICONS.scope8, label: t("sens_8x", lang), value: data.scope8 },
-  ];
-
-  const accent = color === "purple" ? "text-purple-300" : "text-orange-300";
-  const dotBg = color === "purple" ? "bg-purple-500" : "bg-orange-500";
-  const barGrad = color === "purple" ? "from-purple-600 to-purple-300" : "from-orange-600 to-orange-300";
-  const glow = color === "purple" ? "rgba(168,85,247,0.55)" : "rgba(255,122,0,0.55)";
-  // normalize each row to the table's own peak so the magnification decay reads visually
-  // ignore zero entries (e.g. scope-only hip-fire gyro) when finding the peak
-  const liveRows = rows.filter((r) => r.value > 0);
-  const max = Math.max(...liveRows.map((r) => r.value), 1);
-
+  const rows = SCOPE_DEFS.map(s => ({ icon: s.icon, label: t(s.labelKey as never, lang), value: data[s.key] }));
   return (
     <div className="card rounded-2xl p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <span className="text-lg">{color === "orange" ? "📷" : "🌀"}</span>
-        <h4 className={`font-display text-sm font-bold tracking-wide ${accent}`}>{label}</h4>
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-base">{icon}</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-white/70">{title}</span>
       </div>
       <div className="space-y-1.5">
-        {rows.map((r) => {
+        {rows.map(r => {
           const off = r.value <= 0;
           const pct = off ? 0 : Math.round((r.value / max) * 100);
           return (
             <div key={r.label} className={`rounded-lg bg-white/[0.02] px-2.5 py-1.5 ${off ? "opacity-40" : ""}`}>
               <div className="mb-1 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-white/70">
-                  <span>{r.icon}</span>
-                  <span>{r.label}</span>
-                </div>
-                <span className={`font-display text-sm font-bold tabular-nums ${off ? "text-white/30" : accent}`}>
-                  {off ? "—" : `${r.value}%`}
-                </span>
+                <span className="flex items-center gap-1.5 text-xs text-white/70"><span>{r.icon}</span><span>{r.label}</span></span>
+                <span className={`font-display text-sm font-bold tabular-nums ${off ? "text-white/30" : accent}`}>{off ? "—" : `${r.value}%`}</span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/5">
-                <div
-                  className={`h-full rounded-full bg-gradient-to-r ${barGrad} transition-all duration-500`}
-                  style={{ width: `${pct}%`, boxShadow: off ? "none" : `0 0 6px ${glow}` }}
-                />
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                <div className={`h-full rounded-full bg-gradient-to-r ${barClass}`} style={{ width: `${pct}%`, transition: "width 0.4s ease-out" }} />
               </div>
             </div>
           );
@@ -342,21 +288,19 @@ export function SensTable({
       {showTppFpp && (
         <div className="mt-2 grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-white/5 bg-black/30 px-2.5 py-1.5 text-center">
-            <div className="text-[9px] uppercase tracking-widest text-white/40">{t("sens_tpp", lang)}</div>
-            <div className={`font-display text-sm font-bold tabular-nums ${accent}`}>{data.tpp}%</div>
+            <div className="text-[10px] text-white/40">{t("sens_tpp", lang)}</div>
+            <div className="font-display text-sm font-bold text-white tabular-nums">{data.tpp}%</div>
           </div>
           <div className="rounded-lg border border-white/5 bg-black/30 px-2.5 py-1.5 text-center">
-            <div className="text-[9px] uppercase tracking-widest text-white/40">{t("sens_fpp", lang)}</div>
-            <div className={`font-display text-sm font-bold tabular-nums ${accent}`}>{data.fpp}%</div>
+            <div className="text-[10px] text-white/40">{t("sens_fpp", lang)}</div>
+            <div className="font-display text-sm font-bold text-white tabular-nums">{data.fpp}%</div>
           </div>
         </div>
       )}
-      <div className={`mt-2 h-0.5 w-full rounded ${dotBg} opacity-40`} />
     </div>
   );
 }
 
-// ==================== UI: FACTORS CARD ====================
 export function FactorsCard({ factors }: { factors: Sens["factors"] }) {
   const { lang } = useLang();
   const items = [
@@ -367,13 +311,11 @@ export function FactorsCard({ factors }: { factors: Sens["factors"] }) {
   ];
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {items.map((it) => (
+      {items.map(it => (
         <div key={it.k} className="card rounded-xl p-3 text-center">
           <div className="font-display text-lg font-black text-orange-300">{it.k}</div>
           <div className="text-[10px] text-white/50">{it.label}</div>
-          <div className="mt-1 font-display text-sm font-bold text-white tabular-nums">
-            {(it.v * 100).toFixed(0)}%
-          </div>
+          <div className="font-display text-sm font-bold text-white tabular-nums">{(it.v * 100).toFixed(0)}%</div>
         </div>
       ))}
     </div>

@@ -8,7 +8,7 @@ export function Hero({ ping }: { ping: number | null }) {
   const connector = isAr ? "و" : lang === "es" ? "y" : lang === "ru" ? "и" : lang === "tr" ? "ve" : "and";
 
   const stats = [
-    { k: t("hero_stats_devices", lang), v: "77", sub: t("hero_devices_sub", lang) },
+    { k: t("hero_stats_devices", lang), v: "112", sub: t("hero_devices_sub", lang) },
     { k: t("hero_stats_weapons", lang), v: "44", sub: t("hero_weapons_sub", lang) },
     { k: t("hero_stats_servers", lang), v: "7", sub: t("hero_servers_sub", lang) },
   ];
@@ -29,6 +29,7 @@ export function Hero({ ping }: { ping: number | null }) {
     <div className="relative grid items-center gap-8 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:py-16">
       <div>
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1">
+          <span className="text-sm">🦅</span>
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
           <span className="text-[10px] font-bold tracking-widest text-orange-300">{t("hero_badge", lang)}</span>
         </div>
@@ -50,8 +51,8 @@ export function Hero({ ping }: { ping: number | null }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/50">
-          <span>{t("hero_tiktok", lang)} <span className="font-semibold text-white/80">@sceedalyazouri0</span></span>
-          <span>{t("hero_instagram", lang)} <span className="font-semibold text-white/80">@sceedjor11</span></span>
+          <span>{t("hero_tiktok", lang)} <span className="font-semibold text-white/80">@Saeedalyazouri0</span></span>
+          <span>{t("hero_instagram", lang)} <span className="font-semibold text-white/80">@Saeedjor11</span></span>
           <span>{t("hero_pubg_id", lang)} <span className="font-semibold text-white/80">5744469523</span></span>
         </div>
       </div>

@@ -1,168 +1,105 @@
 import { useEffect, useRef } from "react";
 
-/**
- * GOLDEN DUST — phenomenal animated background.
- *
- *  • Flow-field wind (sin/cos currents) drives organic swirling motion.
- *  • `lighter` composite blending makes overlapping motes glow like embers.
- *  • A translucent dark wash each frame leaves bright motion trails
- *    → the motion is unmistakable and looks like flowing gold dust.
- *  • A layer of large, soft bokeh orbs adds depth.
- */
 export function Particles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    let w = (canvas.width = window.innerWidth);
-    let h = (canvas.height = window.innerHeight);
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const clampN = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
-
-    const GOLD = ["#ffd166", "#ff7a00", "#ffefc4", "#ffb347", "#ffe08a", "#ffcb6b", "#ff9a3c"];
-
-    type Mote = {
-      x: number; y: number; r: number; vx: number; vy: number;
-      color: string; phase: number; ps: number; sway: number; a: number;
-    };
-
-    // ---- fine drifting gold dust ----
-    const dustCount = reduced ? 30 : clampN(Math.floor((w * h) / 8500), 70, 190);
-    const dust: Mote[] = [];
-    for (let i = 0; i < dustCount; i++) {
-      dust.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.8 + 0.5,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: -(Math.random() * 0.45 + 0.12),
-        color: GOLD[Math.floor(Math.random() * GOLD.length)],
-        phase: Math.random() * Math.PI * 2,
-        ps: Math.random() * 0.05 + 0.01,
-        sway: Math.random() * 0.6 + 0.2,
-        a: Math.random() * 0.4 + 0.25,
+    const gold = ["#ffd166","#ffb347","#ff9a3c","#ffe08a","#ffcb6b","#ff7a00","#ffefc4"];
+    type D = { x: number; y: number; r: number; vy: number; vx: number; a: number; t: number; c: string };
+    const count = Math.min(60, Math.floor((W * H) / 28000));
+    const dots: D[] = [];
+    for (let i = 0; i < count; i++) {
+      dots.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 2.5 + 0.5,
+        vy: -(Math.random() * 0.5 + 0.25),
+        vx: (Math.random() - 0.5) * 0.3,
+        a: Math.random() * 0.4 + 0.12,
+        t: Math.random() * Math.PI * 2,
+        c: gold[Math.floor(Math.random() * gold.length)],
       });
     }
 
-    // ---- brighter glowing sparks (few, with real shadow glow) ----
-    const sparkCount = reduced ? 6 : clampN(Math.floor(dustCount / 11), 8, 22);
-    const sparks: Mote[] = [];
-    for (let i = 0; i < sparkCount; i++) {
-      sparks.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.6 + 1.6,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: -(Math.random() * 0.55 + 0.2),
-        color: GOLD[Math.floor(Math.random() * 3)], // warmest tones
-        phase: Math.random() * Math.PI * 2,
-        ps: Math.random() * 0.06 + 0.02,
-        sway: Math.random() * 0.9 + 0.3,
-        a: Math.random() * 0.35 + 0.5,
-      });
-    }
-
-    // ---- depth bokeh ----
-    const bokehCount = reduced ? 0 : clampN(Math.floor((w * h) / 110000), 4, 11);
-    const bokeh = Array.from({ length: bokehCount }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 70 + 35,
-      vy: -(Math.random() * 0.12 + 0.03),
-      phase: Math.random() * Math.PI * 2,
-      color: GOLD[Math.floor(Math.random() * 3)],
-    }));
-
-    let t = 0;
-    let raf = 0;
-
-    const drawMote = (p: Mote, glow: boolean) => {
-      const tw = 0.45 + (Math.sin(p.phase) * 0.5 + 0.5) * 0.55; // 0.45–1.0 twinkle
-      ctx.globalAlpha = tw * p.a;
-      ctx.fillStyle = p.color;
-      if (glow) {
-        ctx.shadowBlur = 14;
-        ctx.shadowColor = p.color;
-      }
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    };
-
+    let raf = 0, f = 0;
     const loop = () => {
-      // 1) translucent dark wash → motion trails (keeps it dark + dynamic)
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
+      f++;
+      ctx.clearRect(0, 0, W, H);
+      for (const d of dots) {
+        d.y += d.vy; d.x += d.vx + Math.sin(d.t + f * 0.008) * 0.1; d.t += 0.014;
+        if (d.y < -8) { d.y = H + 8; d.x = Math.random() * W; }
+        if (d.x < -8) d.x = W + 8; if (d.x > W + 8) d.x = -8;
+        ctx.globalAlpha = d.a * (0.5 + Math.abs(Math.sin(d.t)) * 0.5);
+        ctx.fillStyle = d.c; ctx.shadowBlur = 6; ctx.shadowColor = d.c;
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "rgba(5,7,12,0.16)";
-      ctx.fillRect(0, 0, w, h);
-
-      // 2) additive glow for all gold
-      ctx.globalCompositeOperation = "lighter";
-
-      const windY = (p: Mote) => Math.sin(p.y * 0.0035 + t) * 0.45 + Math.cos(p.x * 0.0025 + t * 0.7) * 0.35;
-
-      // depth bokeh (soft, slow)
-      for (const b of bokeh) {
-        b.y += b.vy;
-        b.phase += 0.006;
-        if (b.y < -b.r) { b.y = h + b.r; b.x = Math.random() * w; }
-        const al = 0.03 + (Math.sin(b.phase) * 0.5 + 0.5) * 0.05;
-        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        g.addColorStop(0, b.color);
-        g.addColorStop(1, "rgba(255,209,102,0)");
-        ctx.globalAlpha = al;
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // fine dust
-      for (const p of dust) {
-        p.x += p.vx + windY(p) + Math.sin(t + p.phase) * p.sway * 0.25;
-        p.y += p.vy;
-        p.phase += p.ps;
-        if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
-        if (p.x < -10) p.x = w + 10;
-        if (p.x > w + 10) p.x = -10;
-        drawMote(p, false);
-      }
-
-      // glowing sparks
-      for (const p of sparks) {
-        p.x += p.vx + windY(p) + Math.sin(t + p.phase) * p.sway * 0.3;
-        p.y += p.vy;
-        p.phase += p.ps;
-        if (p.y < -12) { p.y = h + 12; p.x = Math.random() * w; }
-        if (p.x < -12) p.x = w + 12;
-        if (p.x > w + 12) p.x = -12;
-        drawMote(p, true);
-      }
-
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-      t += 0.012;
       raf = requestAnimationFrame(loop);
     };
     loop();
 
-    const onResize = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-    };
+    const rs = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener("resize", rs);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", rs); };
   }, []);
 
-  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true" />;
+  return (
+    <>
+      {/* Golden Eagle SVG — majestic backdrop */}
+      <div className="pointer-events-none fixed inset-0 flex items-start justify-center overflow-hidden" aria-hidden="true" style={{ zIndex: -3, paddingTop: '3vh' }}>
+        <svg viewBox="0 0 800 550" width="100%" height="auto"
+          style={{
+            maxWidth: '950px',
+            opacity: 0.20,
+            filter: 'drop-shadow(0 0 70px rgba(255,140,0,0.7)) drop-shadow(0 0 160px rgba(255,100,0,0.35))',
+            animation: 'eagleFloat 8s ease-in-out infinite',
+          }}
+        >
+          <defs>
+            <linearGradient id="eg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ffd166" />
+              <stop offset="40%" stopColor="#ff7a00" />
+              <stop offset="100%" stopColor="#ff4500" />
+            </linearGradient>
+            <linearGradient id="eb" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#1a0800" />
+              <stop offset="100%" stopColor="#3a1500" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="400" cy="280" rx="55" ry="100" fill="url(#eb)" />
+          <ellipse cx="400" cy="235" rx="38" ry="65" fill="#2a1000" />
+          <ellipse cx="400" cy="155" rx="30" ry="35" fill="#1a0800" />
+          <path d="M395 125 L412 142 L395 155 Z" fill="#ff7a00" />
+          <circle cx="412" cy="145" r="6" fill="#ffd166" />
+          <circle cx="413" cy="144" r="2.5" fill="#05070c" />
+          <path d="M340 240 Q180 100 60 30 Q130 80 190 140 Q90 45 15 65 Q110 110 185 170 Q70 95 5 125 Q95 150 180 190 Q70 155 10 195 Q95 190 185 215 Q110 215 50 240 Q140 230 215 235 Q160 250 80 265 Q175 265 270 255 L340 240Z" fill="url(#eg)" stroke="#ff4500" strokeWidth="1" opacity="0.85" />
+          <path d="M190 140 Q140 95 60 30" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M185 170 Q110 85 15 65" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M180 190 Q95 120 5 125" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M185 215 Q95 170 10 195" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M460 240 Q620 100 740 30 Q670 80 610 140 Q710 45 785 65 Q690 110 615 170 Q730 95 795 125 Q705 150 620 190 Q730 155 790 195 Q705 190 615 215 Q690 215 750 240 Q660 230 585 235 Q640 250 720 265 Q625 265 530 255 L460 240Z" fill="url(#eg)" stroke="#ff4500" strokeWidth="1" opacity="0.85" />
+          <path d="M610 140 Q660 95 740 30" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M615 170 Q690 85 785 65" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M620 190 Q705 120 795 125" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M615 215 Q705 170 790 195" stroke="#ffd166" strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d="M365 375 L345 450 Q400 475 455 450 L435 375Z" fill="#2a1000" />
+          <path d="M375 375 L358 460 L400 485 L442 460 L425 375Z" fill="url(#eg)" opacity="0.6" />
+          <path d="M375 378 L370 420 L355 432 M370 420 L382 438 M370 420 L365 436" stroke="#ff7a00" strokeWidth="2" fill="none" />
+          <path d="M425 378 L430 420 L445 432 M430 420 L418 438 M430 420 L435 436" stroke="#ff7a00" strokeWidth="2" fill="none" />
+        </svg>
+      </div>
+
+      {/* Floating gold dust canvas */}
+      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0" aria-hidden="true" style={{ zIndex: -2, opacity: 0.75 }} />
+    </>
+  );
 }
