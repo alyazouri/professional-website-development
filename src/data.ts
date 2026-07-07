@@ -256,19 +256,23 @@ export const WEAPONS: WeaponCategory[] = [
       w("FAMAS", 55, 85, "ar"),
       w("Groza", 68, 80, "ar"),
       w("Mk47 Mutant", 70, 90, "ar"),
+      w("Honey Badger", 40, 55, "ar"),
+      w("K2", 49, 78, "ar"),
     ],
   },
   {
     id: "smg", name: "SMG", icon: "💥",
     weapons: [
       w("UMP45", 32, 45, "smg"),
-      w("Micro UZI", 30, 35, "smg"),
+      w("Micro UZI", 36, 35, "smg"),
       w("Vector", 28, 35, "smg"),
       w("Tommy Gun", 40, 45, "smg"),
       w("MP5K", 30, 45, "smg"),
       w("PP-19 Bizon", 26, 48, "smg"),
       w("P90", 34, 50, "smg"),
       w("UMP9", 33, 45, "smg"),
+      w("JS9", 22, 42, "smg"),
+      w("MP9", 24, 40, "smg"),
     ],
   },
   {
@@ -281,6 +285,8 @@ export const WEAPONS: WeaponCategory[] = [
       w("DMR", 58, 300, "dmr"),
       w("VSS", 22, 200, "dmr"),
       w("QBU", 42, 320, "dmr"),
+      w("Mk12", 44, 350, "dmr"),
+      w("Dragunov", 75, 400, "dmr"),
     ],
   },
   {
@@ -291,6 +297,7 @@ export const WEAPONS: WeaponCategory[] = [
       w("M24", 78, 850, "sniper"),
       w("Win94", 55, 400, "sniper"),
       w("Lynx AMR", 95, 900, "sniper"),
+      w("Mosin Nagant", 79, 820, "sniper"),
     ],
   },
   {
@@ -298,6 +305,7 @@ export const WEAPONS: WeaponCategory[] = [
     weapons: [
       w("M249", 68, 120, "lmg"),
       w("DP-28", 72, 110, "lmg"),
+      w("MG3", 62, 130, "lmg"),
     ],
   },
   {
@@ -307,6 +315,10 @@ export const WEAPONS: WeaponCategory[] = [
       w("S1897", 85, 30, "shotgun"),
       w("S686", 90, 25, "shotgun"),
       w("DBS", 78, 28, "shotgun"),
+      w("M1014", 60, 22, "shotgun"),
+      w("NS2000", 92, 35, "shotgun"),
+      w("O12", 55, 20, "shotgun"),
+      w("Sawed-Off", 95, 15, "shotgun"),
     ],
   },
   {
@@ -318,6 +330,7 @@ export const WEAPONS: WeaponCategory[] = [
       w("Desert Eagle", 55, 45, "pistol"),
       w("P18C", 32, 25, "pistol"),
       w("Scorpion", 28, 30, "pistol"),
+      w("R45", 45, 38, "pistol"),
     ],
   },
 ];
@@ -386,6 +399,9 @@ export const JORDAN_DNS: DnsServer[] = [
   { id: "dns13", ip: "77.245.13.191", label: "JO-DNS 13", isp: "Zain", base: 6 },
   { id: "dns14", ip: "80.90.161.242", label: "JO-DNS 14", isp: "Orange", base: 7 },
   { id: "dns15", ip: "80.90.172.146", label: "JO-DNS 15", isp: "Orange", base: 7 },
+  { id: "dns16", ip: "46.32.114.242", label: "JO-DNS 16", isp: "Zain", base: 6 },
+  { id: "dns17", ip: "46.32.114.248", label: "JO-DNS 17", isp: "Zain", base: 6 },
+  { id: "dns18", ip: "46.32.100.238", label: "JO-DNS 18", isp: "Zain", base: 7 },
 ];
 
 // ==================== PRO PLAYER PRESETS (#36 Transfer Learning) ====================
@@ -458,7 +474,7 @@ export function getProSens(player: ProPlayer, scopeIdx: number, table: "cam" | "
 export const FINGERS = [2, 3, 4, 5, 6];
 
 // ==================== PRO PROFILES ====================
-export type ProProfileId = "balanced" | "aggressive" | "competitive" | "headshot" | "sniper" | "spray";
+export type ProProfileId = "balanced" | "aggressive" | "competitive" | "headshot" | "sniper" | "spray" | "elite" | "max";
 
 export type ProProfile = {
   id: ProProfileId;
@@ -560,6 +576,32 @@ export const PRO_PROFILES: ProProfile[] = [
     bestFor: ["Sprayers", "LMG users", "Zone fighters"],
     bestForAr: ["الرشّاشون", "مستخدمو LMG", "مقاتلو المنطقة"],
   },
+  {
+    id: "elite",
+    name: "ELITE", nameAr: "إليت", icon: "💎",
+    recoilControl: 92, tracking: 94, flicking: 88, longRange: 90, cqcPower: 96, sensMultiplier: 1.15,
+    description: "The ultimate all-in-one — CQC melt + laser spray + headshot precision + vehicle track.",
+    descriptionAr: "الأسطورة الشاملة — رش قريب يذوب + ليزر بعيد + طلقات رقبة + تتبع مركبات.",
+    strengths: ["CQC GOD", "Laser long spray", "Headshot magnet", "Vehicle tracking"],
+    strengthsAr: ["ملك القريب", "رش ليزر بعيد", "مغناطيس رأس", "تتبع مركبات"],
+    weaknesses: ["Needs practice", "Aggressive recoil feel"],
+    weaknessesAr: ["يحتاج تمرين", "ارتداد قوي للتعود"],
+    bestFor: ["PRO ELITE players", "Tournament winners", "CQC + Long hybrids"],
+    bestForAr: ["لاعبو النخبة", "أبطال البطولات", "هجين قريب + بعيد"],
+  },
+  {
+    id: "max",
+    name: "MAX POWER", nameAr: "ماكس باور", icon: "⚡",
+    recoilControl: 100, tracking: 100, flicking: 95, longRange: 95, cqcPower: 100, sensMultiplier: 1.25,
+    description: "Absolute maximum performance — every stat at peak. For the fearless.",
+    descriptionAr: "أقصى أداء مطلق — كل الإحصائيات في الذروة. للشجعان فقط.",
+    strengths: ["Maximum everything", "No limits", "Pure domination"],
+    strengthsAr: ["أقصى كل شيء", "بلا حدود", "هيمنة مطلقة"],
+    weaknesses: ["Overwhelming for beginners", "Unforgiving mistakes"],
+    weaknessesAr: ["ساحق للمبتدئين", "لا يرحم الأخطاء"],
+    bestFor: ["Absolute legends", "Rank 1 grinders", "Fearless warriors"],
+    bestForAr: ["أساطير مطلقة", "مقاتلو المرتبة الأولى", "محاربون بلا خوف"],
+  },
 ];
 
 export type ProRecommendation = {
@@ -636,6 +678,26 @@ export const PRO_RECOMMENDATIONS: Record<ProProfileId, ProRecommendation> = {
     featureStackAr: ["نقل الرش", "رش من القرفصة", "طلقات من بعيد"],
     warmup: ["Spray drill ×5", "Transfer targets", "Burst accuracy"],
     warmupAr: ["تمرين رش ×5", "نقل الأهداف", "دقة الطلقات"],
+  },
+  elite: {
+    gyro: "always", minFingers: 4, preferredWeaponName: "M416",
+    weaponFocus: ["AR", "SMG"], weaponFocusAr: ["رشاش هجومي", "رشاش خفيف"],
+    note: "The ONE — CQC melt + laser long + neck lock + vehicle track + sticky aim. Just win.",
+    noteAr: "الأسطورة — رش قريب يذوب + ليزر بعيد + رقبة + تتبع مركبات + إلصاق. فقط اربح.",
+    featureStack: ["CQC aimbot feel", "Laser 6× spray", "Neck lock precision", "Vehicle Free Look 199%"],
+    featureStackAr: ["إحساس ايم بوت قريب", "رش 6× ليزر", "دقة رقبة متناهية", "فري لوك مركبات 199%"],
+    warmup: ["3 min CQC drill", "5 min M416 50m spray", "Headshot only ×20"],
+    warmupAr: ["3 دقائق تدريب قريب", "5 دقائق رش M416", "رأس فقط ×20"],
+  },
+  max: {
+    gyro: "always", minFingers: 4, preferredWeaponName: "M416",
+    weaponFocus: ["AR", "SMG", "Sniper"], weaponFocusAr: ["رشاش", "خفيف", "قنّاص"],
+    note: "MAXIMUM EVERYTHING — sensMultiplier 1.25. No fear. No limits. Pure destruction.",
+    noteAr: "أقصى كل شيء — مضاعف 1.25. بلا خوف. بلا حدود. دمار شامل.",
+    featureStack: ["Max sens output", "Hyper gyro", "360° domination"],
+    featureStackAr: ["أقصى حساسية", "جايرو خارق", "هيمنة 360°"],
+    warmup: ["5 min full send", "All scopes ×5", "Rage mode ON"],
+    warmupAr: ["5 دقائق اندفاع كامل", "كل السكوبات ×5", "وضع الهيجان"],
   },
 };
 

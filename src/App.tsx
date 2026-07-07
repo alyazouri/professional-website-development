@@ -33,6 +33,9 @@ const playStyles = [
   { id: "close", icon: "💢", ar: "قريب", en: "Close" },
   { id: "closespray", icon: "🔥", ar: "رش قريب", en: "Close Spray" },
   { id: "longspray", icon: "🎯", ar: "ثبات بعيد", en: "Long Spray" },
+  { id: "proelite", icon: "👑", ar: "برو إليت", en: "PRO ELITE" },
+  { id: "sniperpro", icon: "🔭", ar: "قناص محترف", en: "Sniper Pro" },
+  { id: "quickscope", icon: "⚡", ar: "كويك سكوب", en: "Quick Scope" },
 ];
 
 export default function App() {
@@ -379,7 +382,7 @@ export default function App() {
                 </div>
                 <div className="card rounded-2xl p-4">
                   <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-white/50">{isAr ? "أسلوب اللعب" : "Play Style"}</label>
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {playStyles.map((s) => (
                       <button
                         key={s.id}

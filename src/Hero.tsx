@@ -9,7 +9,7 @@ export function Hero({ ping }: { ping: number | null }) {
 
   const stats = [
     { k: t("hero_stats_devices", lang), v: "112", sub: t("hero_devices_sub", lang) },
-    { k: t("hero_stats_weapons", lang), v: "44", sub: t("hero_weapons_sub", lang) },
+    { k: t("hero_stats_weapons", lang), v: "67", sub: t("hero_weapons_sub", lang) },
     { k: t("hero_stats_servers", lang), v: "7", sub: t("hero_servers_sub", lang) },
   ];
 
