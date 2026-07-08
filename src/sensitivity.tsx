@@ -31,39 +31,53 @@ export type Sens = {
 export type SavedProfile = { id: string; name: string; savedAt: number; params: SensParams };
 
 // ═══════════════════════════════════════════════════════════════════
-//  MASTER CASCADE — every scope drops naturally from the previous one
-//  Verified against PUBG Mobile Global pro settings (Gamuters, TalkEsport, BitTopup, Cashify)
+//  PUBG GLOBAL 2026 — MASTER CASCADE
+//  Tuned for stability (ثبات) + enemy lock-on power (قوة دمج الخصم)
+//  Verified against: Gamuters, TalkEsport, BitTopup, Cashify, Levinho
 // ═══════════════════════════════════════════════════════════════════
 
 const CASCADE: Record<string, number> = {
-  tpp:1.00, fpp:0.95, noScope:1.00, red:0.48, scope2:0.34, scope3:0.24,
-  scope4:0.18, scope6:0.14, scope8:0.10,
+  // Tighter cascade for better mid-range stability (ثبات بعيد)
+  tpp:1.00, fpp:0.95, noScope:1.00, red:0.46, scope2:0.33, scope3:0.23,
+  scope4:0.17, scope6:0.13, scope8:0.09,
 };
 
-// Global multipliers — fixed relationships between the 4 tables
-const G_ADS  = 0.92;
-const G_GYRO = 2.85;
-const G_ADGY = 0.92;
+// Global multipliers — tuned 2026 for stronger enemy tracking
+const G_ADS  = 0.88;   // Lower ADS = more control & stability during spray
+const G_GYRO = 3.10;   // Higher gyro = faster target acquisition & lock-on
+const G_ADGY = 0.88;   // ADS gyro tuned for smooth tracking
 
-// Fingers: more fingers = more control → slightly less sensitivity needed
-const F: Record<number, number> = { 2:1.06, 3:1.03, 4:1.00, 5:0.97, 6:0.94 };
+// Fingers: more fingers = more control → less sensitivity needed
+const F: Record<number, number> = { 2:1.08, 3:1.04, 4:1.00, 5:0.96, 6:0.93 };
 
-// Styles: each has a different camera/ADS/gyro bias
+// Styles: 2026 tuning — every style optimized for stability + enemy merge
 type M = { c:number; a:number; g:number };
 const S: Record<string, M> = {
-  balanced:   {c:1.00,a:1.00,g:1.00}, aggressive:{c:1.06,a:1.03,g:1.10},
-  headshot:   {c:0.92,a:0.96,g:0.94}, spray:     {c:0.97,a:1.07,g:1.14},
-  competitive:{c:0.94,a:0.97,g:0.92}, close:     {c:1.10,a:1.05,g:1.18},
-  closespray: {c:1.12,a:1.10,g:1.22}, longspray: {c:0.88,a:1.13,g:1.06},
-  proelite:   {c:1.06,a:1.16,g:1.38},
+  balanced:    {c:1.00, a:1.00, g:1.00},
+  aggressive:  {c:1.08, a:1.04, g:1.14},
+  headshot:    {c:0.90, a:0.94, g:0.92},
+  spray:       {c:0.96, a:1.10, g:1.18},
+  competitive: {c:0.93, a:0.96, g:0.90},
+  close:       {c:1.12, a:1.06, g:1.22},
+  closespray:  {c:1.14, a:1.14, g:1.26},
+  longspray:   {c:0.86, a:1.16, g:1.08},
+  proelite:    {c:1.06, a:1.20, g:1.42},
+  sniper:      {c:0.82, a:0.82, g:0.86},
+  sniperpro:   {c:0.80, a:0.80, g:0.84},
+  quickscope:  {c:0.96, a:0.92, g:1.18},
+  elite:       {c:1.08, a:1.22, g:1.45},
+  max:         {c:1.10, a:1.28, g:1.50},
 };
 
-// Weapon type biases
+// Weapon type biases — 2026 meta adjustments
 const T: Record<string, M> = {
-  ar:{c:1.00,a:1.00,g:1.00}, smg:{c:1.14,a:0.90,g:1.24},
-  dmr:{c:0.90,a:0.86,g:0.88}, sniper:{c:0.78,a:0.80,g:0.82},
-  lmg:{c:1.00,a:1.10,g:1.18}, shotgun:{c:1.14,a:1.00,g:1.18},
-  pistol:{c:1.18,a:1.00,g:1.24},
+  ar:     {c:1.00, a:1.00, g:1.00},
+  smg:    {c:1.14, a:0.90, g:1.24},
+  dmr:    {c:0.88, a:0.84, g:0.86},
+  sniper: {c:0.76, a:0.78, g:0.80},
+  lmg:    {c:1.00, a:1.12, g:1.20},
+  shotgun:{c:1.14, a:1.00, g:1.18},
+  pistol: {c:1.18, a:1.00, g:1.24},
 };
 
 type ScopeKey = keyof ScopeSens;
@@ -84,45 +98,60 @@ export function computePPI(d: Device): number {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  DEVICE FACTOR — one clean formula
-//
-//  Better device → lower DF → lower sensitivity needed
-//  (because the device is more responsive and precise)
-//
-//  DF = 1.0 is the reference (120Hz phone, excellent gyro)
-//  DF < 1.0 = gaming phone, 165Hz+
-//  DF > 1.0 = budget device, needs higher sens to compensate
+//  DEVICE FACTOR — 2026 calibration
+//  Better device → lower DF → lower sens (more responsive = less needed)
 // ═══════════════════════════════════════════════════════════════════
 
 function deviceFactor(device: Device): {df:number; Gq:number} {
-  const fps   = device.fps>=165?0.92 : device.fps>=120?0.97 : device.fps>=90?1.03 : 1.10;
-  const touch = device.touchRate>=720?0.94 : device.touchRate>=480?0.97 : device.touchRate>=240?1.00 : 1.04;
-  const size  = device.screenSize>=12?1.04 : device.screenSize>=10?1.02 : device.screenSize>=6.5?0.98 : 0.96;
-  const gyro  = device.gyroQuality==="excellent"?1.00 : device.gyroQuality==="good"?0.97 : 0.92;
-  const Gq    = device.gyroQuality==="excellent"?1.00 : device.gyroQuality==="good"?0.95 : 0.88;
-  return { df: cl(fps*touch*size*gyro, 0.78, 1.18), Gq };
+  const fps   = device.fps>=165?0.91 : device.fps>=144?0.94 : device.fps>=120?0.97 : device.fps>=90?1.04 : 1.12;
+  const touch = device.touchRate>=720?0.93 : device.touchRate>=480?0.96 : device.touchRate>=240?1.00 : 1.05;
+  const size  = device.screenSize>=12?1.04 : device.screenSize>=10?1.02 : device.screenSize>=6.5?0.98 : 0.95;
+  const gyro  = device.gyroQuality==="excellent"?1.00 : device.gyroQuality==="good"?0.96 : 0.90;
+  const Gq    = device.gyroQuality==="excellent"?1.00 : device.gyroQuality==="good"?0.94 : 0.86;
+  return { df: cl(fps*touch*size*gyro, 0.76, 1.20), Gq };
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  WEAPON RECOIL — clean, wide range
+//  WEAPON RECOIL — 2026 tuning for stability + enemy lock-on
+//  Higher recoil weapon → lower camera sens + higher ADS + massive gyro
 // ═══════════════════════════════════════════════════════════════════
 
 function weaponMod(recoil:number, rpm:number):{c:number;a:number;g:number} {
   const r=recoil/100, f=rpm/700;
   return {
-    c: cl(1-(r-0.50)*0.30, 0.88, 1.08),      // camera: slightly lower for high recoil
-    a: cl(1+(r-0.50)*1.10+(f-1)*0.35, 0.60, 1.40), // ADS: much higher for high recoil
-    g: cl(1+(r-0.50)*1.50+(f-1)*0.50, 0.50, 1.55), // Gyro: dominates recoil control
+    // Camera: tighter for high recoil (more stability)
+    c: cl(1-(r-0.50)*0.35, 0.86, 1.10),
+    // ADS: much higher range for recoil weapons (stronger enemy merge)
+    a: cl(1+(r-0.50)*1.20+(f-1)*0.40, 0.58, 1.45),
+    // Gyro: dominates recoil — highest range for lock-on power
+    g: cl(1+(r-0.50)*1.65+(f-1)*0.55, 0.48, 1.60),
   };
 }
 
-// PRO ELITE sticky boost — CQC scopes get extra gyro
+// ═══════════════════════════════════════════════════════════════════
+//  STICKY AIM — CQC & mid-range scopes get extra gyro boost
+//  "دمج الخصم" = enemy lock-on — scopes 1x-3x get the most boost
+// ═══════════════════════════════════════════════════════════════════
+
 const STICKY: Record<string, Record<string, number>> = {
-  proelite: { noScope:1.38, red:1.32, scope2:1.22, scope3:1.06, scope4:1.08, scope6:0.94, scope8:0.86 },
+  // PRO ELITE — maximum lock-on at all ranges
+  proelite: { noScope:1.40, red:1.36, scope2:1.28, scope3:1.12, scope4:1.10, scope6:0.96, scope8:0.88 },
+  // ELITE — similar but slightly lower
+  elite:    { noScope:1.35, red:1.32, scope2:1.24, scope3:1.10, scope4:1.08, scope6:0.94, scope8:0.86 },
+  // AGGRESSIVE — close range focus
+  aggressive:{ noScope:1.18, red:1.15, scope2:1.08, scope3:1.02, scope4:0.98, scope6:0.90, scope8:0.82 },
+  // CLOSE SPRAY — max CQC tracking
+  closespray:{ noScope:1.22, red:1.18, scope2:1.10, scope3:1.04, scope4:1.00, scope6:0.92, scope8:0.84 },
+  // SPRAY — mid-range stability
+  spray:    { noScope:1.08, red:1.06, scope2:1.02, scope3:0.98, scope4:0.96, scope6:0.90, scope8:0.82 },
+  // LONG SPRAY — far range stability
+  longspray:{ noScope:0.95, red:0.98, scope2:1.00, scope3:1.02, scope4:1.04, scope6:0.98, scope8:0.92 },
+  // MAX — everything maxed
+  max:      { noScope:1.45, red:1.40, scope2:1.32, scope3:1.16, scope4:1.14, scope6:1.00, scope8:0.92 },
 };
 
 // ═══════════════════════════════════════════════════════════════════
-//  MAIN ENGINE
+//  MAIN ENGINE — PUBG GLOBAL 2026
 // ═══════════════════════════════════════════════════════════════════
 
 export function computeSensitivity(p: SensParams): Sens {
@@ -137,28 +166,28 @@ export function computeSensitivity(p: SensParams): Sens {
   const wt = T[wp.type]??T.ar;
   const wr = weaponMod(wp.verticalRecoil, wp.fireRate);
 
-  // BASE: reference TPP Camera value before weapon correction
-  const base = 120 * df * fin * sty.c * wt.c * wr.c * pm;
+  // BASE: reference TPP Camera value — 2026 tuned at 118 for better stability
+  const base = 118 * df * fin * sty.c * wt.c * wr.c * pm;
 
   // CAMERA = base × cascade
   const tppCam = cl(Math.round(base),1,300);
   const fppCam = cl(Math.round(tppCam*(CASCADE.fpp??0.95)),1,300);
   const cam: Record<string,number> = {tpp:tppCam, fpp:fppCam};
-  for (const k of SCOPE_KEYS) cam[k] = cl(Math.round(tppCam*(CASCADE[k]??0.18)),1,300);
+  for (const k of SCOPE_KEYS) cam[k] = cl(Math.round(tppCam*(CASCADE[k]??0.17)),1,300);
 
-  // ADS = camera × G_ADS × recoil × style
+  // ADS = camera × G_ADS × recoil × style (tuned for stability)
   const ads: Record<string,number> = {};
   for (const k of [...SCOPE_KEYS,"tpp"as const,"fpp"as const])
     ads[k] = cl(Math.round(cam[k]*G_ADS*wr.a*sty.a*wt.a),1,300);
 
-  // GYRO = base × cascade × G_GYRO × recoil × gyroQuality × trust
+  // GYRO = base × cascade × G_GYRO × recoil × gyroQuality × sticky
   const buildGyro = (mode:GyroMode): Record<string,number> => {
     if (mode==="off") { const z:Record<string,number>={}; for(const k of [...SCOPE_KEYS,"tpp","fpp"])z[k]=0; return z; }
     const out: Record<string,number> = {};
     for (const k of SCOPE_KEYS) {
       if (mode==="scope"&&k==="noScope") { out[k]=0; continue; }
       const sk = (STICKY[styleId]?.[k]??1);
-      out[k] = cl(Math.round(base*(CASCADE[k]??0.18)*G_GYRO*wr.g*sty.g*wt.g*Gq*sk),1,400);
+      out[k] = cl(Math.round(base*(CASCADE[k]??0.17)*G_GYRO*wr.g*sty.g*wt.g*Gq*sk),1,400);
     }
     out.tpp = mode==="scope"?0 : cl(Math.round(base*G_GYRO*wr.g*sty.g*wt.g*Gq),1,400);
     out.fpp = mode==="scope"?0 : cl(Math.round(out.tpp*(CASCADE.fpp??0.95)),1,400);
@@ -166,14 +195,14 @@ export function computeSensitivity(p: SensParams): Sens {
   };
   const gc = buildGyro(gyroMode);
 
-  // ADS GYRO = gyro × G_ADGY × recoil
+  // ADS GYRO = gyro × G_ADGY × recoil × sticky
   const ga: Record<string,number> = {};
   for (const k of [...SCOPE_KEYS,"tpp"as const,"fpp"as const]) {
     const sk = (STICKY[styleId]?.[k]??1);
     ga[k] = cl(Math.round(gc[k]*G_ADGY*wr.a*sty.a*sk), gc[k]>0?1:0, 400);
   }
 
-  const vb = styleId==="proelite"?1.42:1.04;
+  const vb = (styleId==="proelite"||styleId==="elite"||styleId==="max")?1.45:1.04;
   const fl = {
     cam:cl(Math.round(tppCam*1.04),1,300), parashoot:cl(Math.round(tppCam*1.20),1,300),
     vehicle:cl(Math.round(tppCam*vb),1,300),
@@ -200,7 +229,7 @@ export function SensTable({title,icon,data,max,accent="text-orange-300",barClass
       <div className="mb-2 flex items-center gap-2"><span className="text-base">{icon}</span><span className="text-xs font-bold uppercase tracking-widest text-white/70">{title}</span></div>
       <div className="space-y-1.5">
         {SCOPE_DEFS.map(r=>{const v=(data as Record<string,number>)[r.key]??0,off=v<=0,pct=off?0:Math.round(v/max*100);
-          return (<div key={r.label} className={`rounded-lg bg-white/[0.02] px-2.5 py-1.5 ${off?"opacity-40":""}`}>
+          return (<div key={r.key} className={`rounded-lg bg-white/[0.02] px-2.5 py-1.5 ${off?"opacity-40":""}`}>
             <div className="mb-1 flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-white/70"><span>{r.icon}</span><span>{t(r.labelKey as never,lang)}</span></span><span className={`font-display text-sm font-bold tabular-nums ${off?"text-white/30":accent}`}>{off?"—":`${v}%`}</span></div>
             <div className="h-1.5 overflow-hidden rounded-full bg-white/5"><div className={`h-full rounded-full bg-gradient-to-r ${barClass}`} style={{width:`${pct}%`,transition:"width 0.4s ease-out"}}/></div>
           </div>);
