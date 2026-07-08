@@ -54,15 +54,14 @@ const S: Record<string, M> = {
   balanced:   {c:1.00,a:1.00,g:1.00}, aggressive:{c:1.06,a:1.03,g:1.10},
   headshot:   {c:0.92,a:0.96,g:0.94}, spray:     {c:0.97,a:1.07,g:1.14},
   competitive:{c:0.94,a:0.97,g:0.92}, close:     {c:1.10,a:1.05,g:1.18},
-  closespray: {c:1.12,a:1.10,g:1.24}, longspray: {c:0.88,a:1.13,g:1.08},
-  sniperpro:  {c:1.00,a:0.92,g:1.22}, quickscope:{c:1.08,a:0.88,g:1.35},
+  closespray: {c:1.12,a:1.10,g:1.22}, longspray: {c:0.88,a:1.13,g:1.06},
   proelite:   {c:1.06,a:1.16,g:1.38},
 };
 
 // Weapon type biases
 const T: Record<string, M> = {
   ar:{c:1.00,a:1.00,g:1.00}, smg:{c:1.14,a:0.90,g:1.24},
-  dmr:{c:0.90,a:0.86,g:0.90}, sniper:{c:1.05,a:0.70,g:1.55},
+  dmr:{c:0.90,a:0.86,g:0.88}, sniper:{c:0.78,a:0.80,g:0.82},
   lmg:{c:1.00,a:1.10,g:1.18}, shotgun:{c:1.14,a:1.00,g:1.18},
   pistol:{c:1.18,a:1.00,g:1.24},
 };
@@ -118,12 +117,8 @@ function weaponMod(recoil:number, rpm:number):{c:number;a:number;g:number} {
 }
 
 // PRO ELITE sticky boost — CQC scopes get extra gyro
-// STICKY: per-scope gyro boost for specialized profiles
-// sniperpro/quickscope: MASSIVE gyro on CQC scopes for head-lock, precision on long
 const STICKY: Record<string, Record<string, number>> = {
-  proelite:   { noScope:1.38, red:1.32, scope2:1.22, scope3:1.06, scope4:1.08, scope6:0.94, scope8:0.86 },
-  sniperpro:  { noScope:1.20, red:1.50, scope2:1.40, scope3:1.25, scope4:1.12, scope6:0.94, scope8:0.78 },
-  quickscope: { noScope:1.08, red:1.60, scope2:1.52, scope3:1.30, scope4:1.10, scope6:0.88, scope8:0.66 },
+  proelite: { noScope:1.38, red:1.32, scope2:1.22, scope3:1.06, scope4:1.08, scope6:0.94, scope8:0.86 },
 };
 
 // ═══════════════════════════════════════════════════════════════════
